@@ -1,0 +1,243 @@
+<!-- ─────────────────────────────────────────────────────────────────────────────
+     1) In your <head> (once only), add these styles:
+        
+───────────────────────────────────────────────────────────────────────────── -->
+<style>
+  /* About section background & padding */
+  #about {
+    background-color: #f8f9fa; /* Bootstrap’s “bg-light” */
+    padding: 4rem 0;
+    text-align: center;
+  }
+  /* Profile image styling */
+  #about .profile-pic {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    background-color: #6c757d; /* fallback gray */
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  /* Paragraphs centered & constrained */
+  #about .about-text {
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+    color: #6c757d; /* Bootstrap’s text-muted */
+    line-height: 1.6;
+  }
+</style>
+<style>
+  /* ───────────────── Projects Section Styles ───────────────── */
+  #projects {
+    padding: 4rem 0;
+    background-color: #fff;
+  }
+  #projects .project-card {
+    background-color: #f1f4f5;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+  }
+  #projects .project-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  #projects .project-links a {
+    text-decoration: none;
+  }
+</style>
+<style>
+  /* ───────────────── Skills Section Styles ───────────────── */
+  #skills {
+    background-color: #f8f9fa;  /* match About’s bg-light */
+    padding: 4rem 0;
+    text-align: center;
+  }
+  #skills .skill-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+  }
+  #skills .skill-card {
+    padding: 1rem;
+  }
+  #skills .skill-text {
+    max-width: 250px;
+    margin: 0 auto 1rem;
+    color: #6c757d;  /* Bootstrap text-muted */
+    line-height: 1.6;
+  }
+  #skills .skill-card a {
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+</style>
+
+
+<!-- ─────────────────────────────────────────────────────────────────────────────
+     2) Insert this “About” section after your last </section> in the body:
+───────────────────────────────────────────────────────────────────────────── -->
+<section id="about">
+  <div class="container">
+    <h2 class="fw-bold mb-4">About</h2>
+
+    <!-- profile placeholder -->
+    <img
+      src="images/about/1.jpg"
+      alt="Your Name"
+      class="profile-pic"
+    >
+
+    <!-- first paragraph -->
+    <p class="about-text">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sit amet dolor dolor.
+      Suspendisse ligula elit, hendrerit ut bibendum quis, facilisis vitae est. Vivamus vitae
+      felis sit amet sem rhoncus euismod. Praesent sem dolor, ullamcorper nec tempor quis,
+      pulvinar sed dolor. Quisque pretium felis ac nisi posuere, id commodo lorem porttitor.
+      Nam in condimentum ex. Nam accumsan nisi turpis, sed tempus dolor volutpat non. Proin id
+      enim feugiat ipsum consectetur mattis. Nam blandit venenatis nisi, convallis imperdiet
+      nisi condimentum at.
+    </p>
+
+    <!-- second paragraph -->
+    <p class="about-text">
+      Duis convallis ligula sed pretium tristique. Duis nunc risus, lacinia eget cursus id,
+      suscipit ac metus. Sed varius sed tortor congue aliquam. In in dapibus diam, in auctor
+      purus. Praesent vitae tristique diam. Donec tincidunt hendrerit tortor, vitae lobortis
+      purus rutrum sit amet. Nunc non arcu vitae leo rhoncus tincidunt vel sed urna. Sed sed
+      efficitur dui. Morbi id velit nisi. Fusce luctus placerat purus eu cursus.
+    </p>
+  </div>
+</section>
+
+<!-- ───────────────────────────────────────────────── Projects Section ─────────────────────────────────────────────── -->
+<section id="projects">
+  <div class="container">
+    <h2 class="fw-bold text-center mb-5">Projects</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+      <!-- Project 1 -->
+      <div class="col">
+        <div class="project-card h-100">
+          <img src="images/projects/1.jpg"
+               alt="Project 1"
+               class="project-img mx-auto d-block">
+          <h5 class="fw-bold mb-2">Project 1</h5>
+          <p class="text-muted mb-3">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed nisl erat.
+          </p>
+          <p class="project-links small">
+            <a href="#" class="me-2">Blog Post</a>|
+            <a href="#" class="ms-2">Source Code</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="col">
+        <div class="project-card h-100">
+          <img src="images/projects/2.jpg"
+               alt="Project 2"
+               class="project-img mx-auto d-block">
+          <h5 class="fw-bold mb-2">Project 2</h5>
+          <p class="text-muted mb-3">
+            Suspendisse imperdiet arcu ex, vel feugiat enim lacinia tincidunt.
+          </p>
+          <p class="project-links small">
+            <a href="#" class="me-2">Blog Post</a>|
+            <a href="#" class="ms-2">Source Code</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="col">
+        <div class="project-card h-100">
+          <img src="images/projects/3.jpg"
+               alt="Project 3"
+               class="project-img mx-auto d-block">
+          <h5 class="fw-bold mb-2">Project 3</h5>
+          <p class="text-muted mb-3">
+            Maecenas lacinia scelerisque arcu a eleifend.
+          </p>
+          <p class="project-links small">
+            <a href="#" class="me-2">Blog Post</a>|
+            <a href="#" class="ms-2">Source Code</a>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ───────────────────────────────────────────────── Skills Section ─────────────────────────────────────────────── -->
+<section id="skills">
+  <div class="container">
+    <h2 class="fw-bold mb-5">Skills</h2>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+
+      <!-- Skill 1: Python -->
+      <div class="col">
+        <div class="skill-card">
+          <img src="images/skills/1.png"
+               alt="Python"
+               class="skill-icon mx-auto d-block">
+          <h5 class="fw-semibold">Python</h5>
+          <p class="skill-text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed nisl erat.
+          </p>
+          <a href="#">Link to course or bootcamp</a>
+        </div>
+      </div>
+
+      <!-- Skill 2: Data Visualization -->
+      <div class="col">
+        <div class="skill-card">
+          <img src="images/skills/2.png"
+               alt="Data Visualization"
+               class="skill-icon mx-auto d-block">
+          <h5 class="fw-semibold">Data Visualization</h5>
+          <p class="skill-text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed nisl erat.
+          </p>
+          <a href="#">Link to course or bootcamp</a>
+        </div>
+      </div>
+
+      <!-- Skill 3: SQL -->
+      <div class="col">
+        <div class="skill-card">
+          <img src="images/skills/3.png"
+               alt="SQL"
+               class="skill-icon mx-auto d-block">
+          <h5 class="fw-semibold">SQL</h5>
+          <p class="skill-text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed nisl erat.
+          </p>
+          <a href="#">Link to course or bootcamp</a>
+        </div>
+      </div>
+
+      <!-- Skill 4: Data Storytelling -->
+      <div class="col">
+        <div class="skill-card">
+          <img src="images/skills/4.png"
+               alt="Data Storytelling"
+               class="skill-icon mx-auto d-block">
+          <h5 class="fw-semibold">Data Storytelling</h5>
+          <p class="skill-text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed nisl erat.
+          </p>
+          <a href="#">Link to course or bootcamp</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── -->
