@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: ICE</title>
+  
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <h1 class="fw-bold mb-4">Demystifying Model Interpretability: A Deep Dive into Partial Dependence Plots</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p>
+      In my transition from neuroscience to data science, one of the most shocking and upsetting realizations was 
+      that so many people, too many people, didn’t know or care about interpretability. Perhaps that’s too harsh - 
+      it’s not necessarily that people didn’t care, but that they seemed to think it was extraneous. My desire for 
+      interpretability was seen as something extra I was bringing to the table, rather than something fundamental to 
+      successful endeavors. Maybe in a world where you can simply install whatever machine learning library you desire 
+      and set a model in motion with a few lines, it’s easy to lose sight of what those few lines mean. I’d like to think 
+      the tide is turning a bit, and as our AI models and machine learning applications become ubiquitous (even where 
+      they’re not strictly necessary), true value will be found in interpretation that can truly connect need with ability,
+       and understanding with function. To that end, I want to embark on a series of posts breaking down some of the common
+        interpretability metrics. We begin with one of the foundational tools for model interpretability - Partial Dependence Plots (PDPs). </p>
+
+    <h2 class="mt-5">TL; DR</h2>
+    <table class="definition-table">
+      <tr>
+        <th colspan="2" class="text-center">PDP</th>
+      </tr>
+      <tr>
+        <td><strong>What:</strong></td>
+        <td>Shows average model prediction as a function of a specified feature</td>
+      </tr>
+      <tr>
+        <td><strong>Use When:</strong></td>
+        <td>You want <em>global interpretability</em></td>
+      </tr>
+      <tr>
+        <td><strong>Assumptions:</strong></td>
+        <td>Feature independence</td>
+      </tr>
+      <tr>
+        <td><strong>Alternatives:</strong></td>
+        <td>ICE, SHAP, ALE</td>
+      </tr>
+    </table>
+
+    <h2 class="mt-5">What is a Partial Dependence Plot?</h2>
+    <p>
+      It was during my master’s coursework in statistics that I learned to calculate statistical tests by hand. We all had laptops and statistical programs
+       - it was that our professor thought we would understand better and appreciate the effect of variables if we really got into the mud with things like
+        ANOVA and ANCOVA tests, t-tests, and confidence intervals. This was when I got a deep understanding of the term “marginal effects”. Marginal anything,
+         really, is the thing calculated literally in the margins, across variables. </p>
+
+    <p>PDPs are ways to evaluate maginal effects of isolated features on the predicted outcomes of the model. With PDPs you can ask the question: "How does varying 
+        this particular feature affect the prediction of the model when everything else is kept the same?" For instance, let’s say you have a stable hair-care routine,
+         and your hair outcomes are fairly predictable. You use shampoo S, conditioner C, brush B, product P, amount of product A, number of brush strokes N, days 
+         since last washing D, (etc., etc.,) and get hair H on any given day, and you can rate your hair day on a scale from 1-10 (1 being “AAAack!” and 10 being 
+         “AAAMaazing!”). Without changing any of the other variables, you might use a PDP to track how relative humidity affects your hair score. This would tell 
+         you the effect that humidity has on your hair that goes beyond what any other variables are doing. Keep in mind, PDPs are <strong>global interpretability</strong> tools; 
+         they reflect average effects over the whole dataset with other features held constant. 
+
+    </p>
+
+    <h2 class="mt-5">How Does It Work?</h2>
+    <p>For a given feature \( x_j \) the PDP is:</p>
+
+    <p class="text-center">
+      \[
+      \hat{f}_{PD}(x_j) = \frac{1}{n} \sum_{i=1}^{n} \hat{f}(x_j, x_{i, -j})
+      \]
+    </p>
+
+    <ul>
+      <li>\( \hat{f} \): The trained model</li>
+      <li>\( x_j \): The feature whose impact you want to study</li>
+      <li>\( x_{i, -j} \): All other features (not \( x_j \)) for instance \( i \), held fixed</li>
+    </ul>
+
+    <p> In words, this means that the effect of the feature of interest on the trained model is equal to the average of all model predictions for varying values 
+        of the features of interest, while holding all other features constant. In the hair example above, you might find that higher humidity leads to worse 
+        hair days, and lower humidity leads to better hair days, revealing a negative linear relationship. Running the same experiment on number-of-days-since-last-wash 
+        (D) could tell you that you get better hair days for low values of D, peaking around 2, but then hair days get worse for larger values of D, creating a
+         quasi-inverse parabolic relationship. These are all guesses, you’d really need to run the experiment on your own hair to be sure, and PDPs would be a tool 
+         to help you understand these reactions.</p>
+
+    <p>In practice:</p>
+    <ol>
+      <li>Choose a grid of values for the feature \( x_j \)</li>
+      <li>For each value, replace \( x_j \) in the dataset with that value across all instances</li>
+      <li>Predict using the modified dataset</li>
+      <li>Average the predictions to get the PDP value</li>
+      <li>Plot your values for \( x_j \) on the x-axis and the predicted output on the y-axis</li>
+    </ol>
+
+    <p>Simple 🙂</p>
+
+    <h2 class="mt-5">Strengths of PDPs</h2>
+    <p>PDPs are incredibly useful for easy-to-interpret, model-agnostic, and scalable interpretability. They can be great for debugging models or presenting 
+        insights to your team or stakeholders. 
+    </p>
+
+    <h2 class="mt-5">When to Use PDPs</h2>
+    <p>
+      PDPs are a low-effort go-to when your model is a black box, like a random forest, gradient boosted tree, or neural network, and you want to see the global 
+      effect of your feature(s) of interest. You might also use it to visualize feature interactions (with 2D PDPs). </p>
+    
+
+    <h2 class="mt-5">Limitations</h2>
+    <p>
+      Be cautious when using PDPs for interpretability if you have any reason to think that your features are correlated - as <strong>PDPs assume feature independence</strong>. 
+      Correlated features can give you misleading results. Additionally, since PDPs show you marginal effects (effects that are averaged over the whole set of other features) 
+      they will not give you any insight into heterogeneity in your sample.
+    </p>
+    <p> Like any other measurement of marginal influence, instance-specific nuances or interactions may be averaged out and lost. I'll go over some alternatives like 
+        SHAP, ALE, and ICE plots in other posts.</p>
+
+    <h2 class="mt-5">Final Thoughts</h2>
+    <p>PDPs offer a simple, intuitive way to visualize how features influence model predictions. While not perfect, they're great starting points in any interpretability
+        workflow. Bonus points for them making you sound like you know what you're talking about - people tend to get really impressed by terms like "<em>marginal effects</em>"
+         and "<em>feature independence</em>". In my next post, I'll explore Individual Conditional Expectation (ICE) plots, which complement PDPs by giving us the ability to 
+         explore how individual observations respond to feature changes - very useful when PDPs are not granular enough. 
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: ICE</title>
+  
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <h1 class="fw-bold mb-4">Demystifying Model Interpretability: A Deep Dive into Individual Conditional Expectation (ICE) Plots</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p>
+      In a previous post, I introduced Partial Dependence Plots (PDPs) and discussed their value as a global interpretability tool. But as with most things in modeling, one tool rarely fits all purposes. If PDPs offer a bird’s-eye view of a model’s behavior from one variable’s perspective, ICE plots give us the chance to swoop down and examine the terrain at the level of individual data points. These tools for granular inspection are the focus of today’s deep dive.
+    </p>
+
+    <h2 class="mt-5">TL; DR</h2>
+    <table class="definition-table">
+      <tr>
+        <th colspan="2" class="text-center">ICE</th>
+      </tr>
+      <tr>
+        <td><strong>What:</strong></td>
+        <td>Shows how model prediction changes for a <em>single observation</em> as one feature varies</td>
+      </tr>
+      <tr>
+        <td><strong>Use When:</strong></td>
+        <td>You want <em>local interpretability</em></td>
+      </tr>
+      <tr>
+        <td><strong>Assumptions:</strong></td>
+        <td>Few assumptions; can handle correlated features gracefully</td>
+      </tr>
+      <tr>
+        <td><strong>Alternatives:</strong></td>
+        <td>PDP, SHAP, LIME, ALE</td>
+      </tr>
+    </table>
+
+    <h2 class="mt-5">What is an Individual Conditional Expectation Plot?</h2>
+    <p>
+      Time for a new analogy. Let’s say you have several dogs, and you, as a data enthusiast, collect all manner of data points about your dogs’ daily lives. 
+      You track the amount and type of food consumed, length and number of walks, hours of sleep and play, treats given, along with breed and biometric data, 
+      and use those variables to predict health and vitality. With PDPs, you could track how changing one specific variable (say, length of walks) influences 
+      health overall. What if your dogs are a bit different, and what affects one, might not affect another in the same way? I have a medium-build, athletic, 
+      energetic dog and a small, lazy, cuddle-beast of a dog - changing the length of their walks will affect each of them differently. This is where ICE comes in. 
+      </p>
+
+    <p>ICE plots don’t average effects across the dataset; instead, they trace the effect of changing one variable for <em>each observation individually</em>. 
+        While PDPs say “on average, longer walks are better for health,” ICE says “let me show you how walk length affects each dog, one at a time.”
+    </p>
+
+    <p>
+      This level of granularity allows us to see whether effects are consistent across populations, or if subgroups react differently - which can be critically important 
+      when your model’s decisions affect real people (or animals) in diverse ways.</p>
+
+    <h2 class="mt-5">How Does It Work?</h2>
+    <p>The ICE function for a feature \( x_j \) and instance \( \mathbf{x}^{(i)} \) is:</p>
+
+    <p class="text-center">
+      \[
+      \hat{f}^{(i)}(x_j) = f(x_j, \mathbf{x}_{-j}^{(i)})
+      \]
+    </p>
+
+    <ul>
+      <li>\( f(\cdot) \): The trained prediction function (e.g., a random forest or neural network)</li>
+      <li>\( \hat{f}^{(i)}(x_j) \): The ICE function – the prediction for the <em>i-th</em> instance as a function of \( x_j \)</li>
+      <li>\( x_j \): The feature whose impact you want to study</li>
+      <li>\( \mathbf{x}_{-j}^{(i)} \): All other features (not \( x_j \)) for instance \( i \), held fixed</li>
+    </ul>
+
+    <p>In practice:</p>
+    <ol>
+      <li>Start with one row of your data (one individual instance)</li>
+      <li>Change one feature — the one you’re analyzing — across a range of values</li>
+      <li>For each value, predict using the model, keeping all others fixed</li>
+      <li>Plot the results: x = feature values, y = predicted outputs</li>
+      <li>Repeat for each row in the dataset to see how effects vary per instance</li>
+    </ol>
+
+    <p>Simple 🙂</p>
+
+    <h2 class="mt-5">Strengths of ICE Plots</h2>
+    <p>
+      ICE analysis is great for:</p>
+      <ul>
+        <li><strong>Detecting heterogeneity</strong>: you can use ICE plots to identify diversity in model responses and subgroup differences</li>
+        <li><strong>Uncovering interactions</strong>: using this method, you can more easily spot interactions or non-linear patterns in the data that
+             might mislead interpretation attempts when masked by marginal averaging.</li>
+        <li><strong>Building trust</strong>: In sensitive applications where individual outcomes matter, ICE analysis can be a powerful tool for fairness evaluation.</li>
+      </ul> 
+    </p>
+
+    <h2 class="mt-5">When to Use ICE Plots</h2>
+    <p>
+      ICE plots are a great go-to when you suspect interactions of subgroup differences (things that might get washed out by PDPs) and you want to audit 
+      how your model behaves for individual cases. They’re also a useful tool for validating fairness or consistency across subpopulations. Additionally, 
+      ICE is handy when you’re working with black-box models and need more than just global interpretability. </p>
+      <p>PDPs and ICE plots are useful together - you can overlay the PDP on top of your ICE plot for a dual view: one line per individual, and the average 
+        across all lines (PDP) to provide context. 
+    </p>
+
+    <h2 class="mt-5">Limitations</h2>
+    <p>
+      ICE plots can become cluttered with many data points or noisy data. The same diversity that makes them powerful can also make them harder to interpret 
+      without smoothing or subgrouping. You also have to be careful when assuming that varying one feature while holding others fixed is <em>actually meaningful</em>. 
+      Too much correlation between features can still make interpretability challenging. 
+    </p>
+    <p> Too much noise and variance in your ICE plots can obscure insights - just imagine trying to interpret 50 observations with their own unique trajectories... Like many methods, 
+        it's best to go into the situation with some principled reason for wanting to compare observations in this way, otherwise you might just get a lot of lines and overwhelm without 
+        much interpretability.</p>
+
+    <h2 class="mt-5">Final Thoughts</h2>
+    <p>ICE plots are an essential complement to PDPs - one gives you the forest, the other shows you the trees. In fields where trust, fairness, or user-level behavior is paramount, 
+        ICE plots can reveal obscure model dynamics and help you understand when and for whom your model is working (or <em>not working</em>). Combined with <strong>domain expertise 
+            and thoughtful storytelling</strong>, they're incredibly useful. Remember! Modeling is not just about prediction, it's also about <stong>understanding.</stong>
+    </p>
+  </div>
+</body>
+</html>

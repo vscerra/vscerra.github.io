@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What Is Normal? A Modern Introduction to Anomaly Detection</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      padding: 2rem;
+      line-height: 1.6;
+      background-color: #fdfdfd;
+      color: #333;
+    }
+    h1, h2, h3 {
+      margin-top: 2rem;
+    }
+    ul {
+      margin-bottom: 1.5rem;
+    }
+    .lead {
+      font-size: 1.25rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="anomaly_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Anomaly Detection</a>
+
+  <div class="container">
+    <h1 class="display-5">Anomaly Detection: The Art and Science of Defining Normal</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">A survey of anomaly detection methods from statistical roots to cutting-edge AI systems.</p>
+
+    <h2>One of These Things Is Not Like the Others</h2>
+    <p>Of the cultural touchstones of 80’s and 90’s children, few were as delightful as Highlights Magazines and “kids menus” at 
+        family restaurants. The puzzles and games couched in colorful imagery tickled my brain in a way that is probably uber-relatable 
+        to a certain age-range demographic in America (the world? Did the larger world get Highlights?). One of the common puzzles of 
+        both Highlights magazine and other child-targeted media of the time was the “One of These Things is Not Like The Others” feature 
+        that usually contained a picture or series of pictures of nouns (people, places, things) wherein a single one would deviate from 
+        the rest in some essential way. Maybe all of the men’s faces would be clean-shaven but for the one mustachioed loner. Perhaps all 
+        but a single woman in a tank top would be wearing long-sleeved shirts; maybe every park pictured would have a water feature, but 
+        only one had a sandy beach. My brother and I would race each other to find the difference. Some were easy, some were challenging 
+        (incidentally, this is how I first learned that spiders are not insects). The dimension along which the “other” differed was not 
+        relevant, the difference was. These entertaining games were my joyful introduction to the practice of anomaly detection. 
+</p>
+
+    <h2>What Is Anomaly Detection?</h2>
+    <p>Anomaly detection is one of those concepts in machine learning that sounds intimidating, but  it’s something that every child can do. 
+        It is simply the task of identifying the data points, events, or patterns that deviate significantly from what is considered normal. 
+        It’s a foundational skill for survival and social prosperity. At its heart, anomaly detection is a complex, algorithmically-parameterized 
+        game of Which of These Things is Not Like the Others. What adds challenge to the task is not finding the outlier, but rather defining “normal”. 
+        Once you know what normal is, the anomalies are obvious. Anomalies are, by nature, rare occurrences - deviations from a pattern. They are also 
+        very often important, and critical to identify - highlighting security breaches, equipment failures, economic disruptions, and even medical risks.</p>
+
+    <h2>Types of Anomalies</h2>
+    <p>Depending on context, anomalies can take different forms:</p>
+    <ul>
+      <li><strong>Point anomalies</strong>: A single value that stands out (e.g., a temperature spike)
+</li>
+      <li><strong>Contextual anomalies</strong>:  Normal occurrences on their own, but strange given context (e.g., paying $400 for a utility bill that is normally $40)</li>
+      <li><strong>Collective anomalies</strong>: A sequence of points that are anomalous (e.g., a series of failed login attempts)</li>
+    </ul>
+
+    <h2>The Early Days: Statistical Methods</h2>
+    <p>Like so many machine learning endeavors, the history of anomaly detection begins with statistics. Traditional methods depended on assumptions about the shape of the 
+        underlying data distribution (that assumption being normality):</p>
+    <ul>
+        <li><strong>Z-Scores</strong> and <strong>IQR</strong> rules for univariate data</li>
+        <li><strong>Grubb's Test</strong> for detecting outliers in Gaussian-distributed data</li>
+        <li><strong>Mahalanobis distance</strong> for multivariate distributions</li>
+    </ul>
+    <p>Basically, if a data point fell outside of the expected range for normally distributed data, it might be an anomaly. While simple and fast, these approaches often 
+        fall short with real-world data with too many assumptions, too little flexibility, and poor scalability to high-dimensional situations. For a really beautiful 
+        illustrated walk-through of these Gaussian methods, I recommend Andrew Ng’s lectures on anomaly detection.</p>
+
+    <h2>The Machine Learning Takeover</h2>
+    <p>Machine learning advances in the 2000s and 2010s offered more adaptive and scalable solutions for increasingly large and complex datasets. The standout impactful 
+        methods were:
+</p>
+    <ul>
+        <li><strong>k-Nearest Neighbors</strong> (KNN) and distance-based outlier detection, which flag data points that are far from their neighbors across dimensions.</li>
+        <li><strong>Clustering algorithms</strong>like DBSCAN, which can identify high density regions of the data space, and treat sparse regions as anomalies.
+</li>
+        <li><strong>One-Class SVM</strong>, which draws a boundary around “normal” data and flags anomalous points outside of that boundary.</li>
+        <li><strong>Isolation Forests</strong>, which randomly split the data and identify outliers based on how easily they can be separated. </li>
+    </ul>
+    <p>The above models moved the field from the rigid thresholds dictated by purely statistical methods to adaptive, data-driven solutions, but they still struggled with 
+        high-dimensional and unstructured data domains.</p>
+
+    <h2>Progress Enabled by Deep Learning</h2>
+    <p>The adoption of neural network architectures opened up new possibilities for anomaly detection, especially with unstructured datasets (like time-series, image, or text). 
+        Rather than just classifying or regressing the data, these new models could learn representations of normal data, in all of its complexity. I once read that 
+        when treasury employees are learning to spot counterfeit money, they intensively and exclusively study genuine currency. They get to know what real money looks 
+        and feels like so completely that anything counterfeit is glaringly obvious not for any feature of its own, but for its difference from what they’ve studied in 
+        such great detail. The above is effectively what deep learning architectures attempt with data - they use neural systems to mimic what we, as humans, do naturally. 
+        The normal features of the data are studied, modeled, and replicated, and when points disrupt or deviate from that learned representation, they are flagged as 
+        potentially anomalous. Key architectures include: </p>
+<ul>
+        <li><strong>Autoencoders</strong>: Neural networks trained to compress and reconstruct inputs. HIgh reconstruction error indicates a possible anomaly.
+</li>
+        <li><strong>Variational Autoencoders (VAEs)</strong> and <strong>GANs</strong>: Generative models that model the distribution of normal data to spot deviations.
+
+</li>
+        <li><strong>LSTMs and Temporal CNNs</strong>: Especially useful with time-series or sequence data, capturing seasonality, dependencies, and trends.</li>
+        <li><strong>Graph Neural Networks (GNNs)</strong>: Neuro-symbolic architecture applied to graph-structured data such as social networks, identifying nodes or subgraphs 
+            that deviate from the norm or expected structure.  </li>
+    </ul>
+    <p>These deep learning models offer more flexibility, but they also introduce new challenges in training complexity, data requirements, and interpretability, 
+        and like all of the models above, they require fine-tuning of thresholds and parameters to give truly useful results.</p>
+
+    <h2>The Impact and Acceleration of the AI Boom</h2>
+    <p>The broader AI expansion of the late 2010s and early 2020s has profoundly shaped anomaly detection in the following ways:
+</p>
+    <ul>
+        <li><strong>Big Data</strong>: More sensors, logs, and transactions = more opportunities for detecting anomalies amongst growing complexity and noise</li>
+        <li><strong>Compute Power</strong>: GPU acceleration and scalable frameworks like PyTorch, TensorFlow, and Spark make real-time and large-scale models practical.</li>
+        <li><strong>Pretrained Models</strong>: Vision and language models can be repurposed for anomaly detection with minimal additional data (especially in NLP and computer vision).</li>
+        <li><strong>AutoML and Integration</strong>: Tools like PyOD, Merlion, and cloud-native services make anomaly detection accessible for non-experts and production pipelines.</li>
+    </ul>
+    <h2>Where Are We Now?</h2>
+    <p>Today, anomaly detection is a hybrid field, blending statistical rigor with neural networks and domain expertise. The best systems often combine: 
+</p>
+<ul>
+    <li>Classical methods as baselines or first-pass filters</li>
+    <li>Deep learning for complex pattern recognition</li>
+    <li>Ensembles to boost robustness</li>
+    <li>Streaming pipelines for real-time detection</li>
+</ul>
+    <p>Benchmarks like the NAB dataset (time-series), NSL-KDD (network security), and MVTec-AD (visual inspection) continue to push the boundaries of evaluation and comparison. 
+</p>
+
+    <h2>Where Are We Headed?</h2>
+    <p>Who really knows? In these days of rapid innovation, it's hard to say for sure, but some areas to keep an eye on, where me might get our most reliable progress, lie in 
+        the directions of:</p>
+    <ul>
+      <li><strong>Few-shot and zero-shot anomaly detection</strong>
+        <p>Future systems may be able to identify novel anomalies with very limited labeled data by leveraging foundation models and transfer learning</p></li>
+      <li><strong>Explainability in high-stakes domains</strong>
+        <p>For too long, ML systems have been black boxes to many of those dealing with and using them. This is no longer enough - particularly in fields like healthcare, 
+            security, and finance - we need interpretable models and rigorous data science professionals who can explain why a point is anomalous.</p></li>
+      <li><strong>Causal Anomaly Detection</strong>
+        <p>An ideal future system would be able to detect anomalies based on causal relationships, rather than correlation, improving robustness and relevance</p></li>
+      <li><strong>Graph-based and neuro-symbolic approaches</strong>
+        <p>The ability to combine structured knowledge (e.g., ontologies or protein interaction maps) with deep learning promises new capabilities in complex domains.
+        </p></li>
+      <li><strong>Fair and Ethical Detection</strong>
+        <p>As these anomaly detection systems continue to influence the world and real-life decisions, we must ensure that they’re fair, unbiased, and privacy-preserving, 
+            particularly in high-stakes domains.</p></li>
+    </ul>
+
+    <h2>Final Thoughts</h2>
+    <p>From simple statistical methods to cutting-edge neural networks that model complex temporal and spatial relationships, anomaly detection remains one of the most 
+        exciting and vital areas of applied AI. As ever, the challenge will always be defining what counts as "normal" - a process humans excel at in practice, and typically struggle with defining. 
+</p>
+  </div>
+</body>
+</html>

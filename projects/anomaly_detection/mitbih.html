@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detecting Anomalies in the MIT-BIH Arrhythmia Dataset</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    table { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="anomaly_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Anomaly Detection</a>
+  <div class="container">
+    <h1 class="display-5">Detecting Anomalies in the MIT-BIH Arrhythmia Dataset</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">Biological time-series anomaly detection using ECG beat morphology and timing with autoencoder models.</p>
+
+    <p>For my second stab at an anomaly detection project, I wanted to try something that felt a little more intuitive than the 
+        NSL-KDD dataset, so I opted for some biological data. This project aimed to explore anomaly detection techniques in biological 
+        time-series data. The focus here was to assess whether beat-level morphology or temporal beat sequences could provide more effective 
+        signals for detecting abnormal cardiac events. Asking more clearly: is it the beat itself that is <em>abnormal</em>, or is it the timing of 
+        the beat that <em>makes it abnormal?</em> 
+</p>
+    <h2>Dataset and Preprocessing</h2>
+    <p>I started by selecting a subset of the MIT-BIH dataset, working with records 100-104. Each record contains multi-channel ECG data annotated 
+        with heartbeat classifications (labeled data). I processed the data by applying a bandpass filter (0.5 - 40 Hz) and a 60 Hz notch filter 
+        to clean the signal, then normalized (z-score) to scale and extracted individual beats based on R-peak annotations.</p>
+    
+    <p>Each beat was stored as a fixed-length window centered around the R-peak. To preserve temporal order for later sequence modeling, I stored 
+        sample indices and R-R intervals (the time between consecutive R-peaks). 
+</p>
+
+    <h2>Exploratory Analysis</h2>
+    <p><strong>Label Frequency Distribution.</strong> The MIT- BIH dataset is labeled - not as “normal” and “abnormal”, but rather in a very informative 
+        spectrum from “normal” to localized abnormalities (“Left bundle branch block, Right bundle branch block), by anatomical subregion (“Atrial 
+        premature beat”, “Premature ventricular beat”, “Ventricular escape beat”, “Fusion of ventricular and normal beat”), and even extra-biological 
+        origin (“Paced beat”). So my first task was deciding what counted as “abnormal”. Plotting the distribution of beat labels revealed that the 
+        dataset was largely comprised of “normal” beats, with “paced” beats taking second place, and a handful of other non-normal beats trailing far 
+        behind. This makes sense, as we’d expect hearts to mostly beat normally. This is also a classical anomaly detection scenario - sifting through 
+        a mountain of normal instances to find the rare abnormal occurrences. 
+</p>
+    <p><strong>PCA Visualization of Beat Morphologies.</strong> In an attempt to understand the morphological differences between the various types of beats present in 
+        the dataset, I performed a Principal Component Analysis (PCA). I had hoped that the various categories of beats in the data might be visually 
+        separable, indicating clear structural differences. When taken all together, I did find varying densities of beats, but not a clear clustering 
+        along labeled lines. The normal vs. abnormal beats formed broad, but not perfect clusters, suggesting some morphological separability. </p>
+        
+    <p><strong>Exploration of RR-Intervals by Label Type.</strong> To try and build on the foothold that PCA gave in terms of morphological separability, 
+        I overlaid RR-intervals as a color-code, hoping that the small differences in density could be enhanced with added temporal information, but alas, 
+        no such luck. The inter-beat intervals were in no way correlated with beat morphological differences. Some part of this arose, no doubt, from the 
+        preponderance of “paced” beats in the sample. Paced beats are <em>designed</em> to resemble normal beats with stable rhythm timing. The clinical context for 
+        this is that paced beat are only “abnormal” in that they’re artificial. Otherwise, they’re intentionally regular and usually indistinguishable from 
+        normal sinus beats. </p>
+
+    <p>Given the above results, going forward into modeling, I decided to exclude the beats that were labeled as paced - at best they mimicked normal beat morphology 
+        and timing, but at worst they presented unique challenges in interpretation. From this point on, I excluded paced beats, and for labelling purposes, I relabeled 
+        all but “normal” beats as “abnormal”</p>
+
+    <h2>Modeling Approaches</h2>
+    <h3>Dense Autoencoder</h3>
+    <p>I started by training a feedforward autoencoder on beat morphology using only normal beats. The model learned to reconstruct 
+        these normal beats with high fidelity. I used reconstruction error (MSE) as the anomaly score, and tested various threshold levels to find one that optimized 
+        F1 score, using the labeled abnormal beats. After optimizing threshold, the dense autoencoder produced clear separation in reconstruction error distributions 
+        between normal and abnormal beats, making it highly effective at identifying anomalies. 
+</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>ROC AUC</th><th>PR AUC</th><th>F1 Score</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>.995</td><td>.992</td><td>.962</td></tr>
+      </tbody>
+    </table>
+
+    <h3>LSTM Autoencoder</h3>
+    <p>To investigate the efficacy of temporal sequencing on anomaly detection, I constructed sequences of five consecutive beats per record, and trained a 
+        sequence-to-sequence Long Short-Term Memory (LSTM) autoencoder model. Each beat was flattened to a single vector before being stacked into sequences. The 
+        LSTM was trained on sequences of normal beats, and used the same reconstruction error logic to flag anomalies. Despite performing well on reconstructing 
+        sequences of normal beats, the LSTM model failed to sufficiently distinguish abnormal ones. This confirmed the early insight that the timing of beats (RR 
+        intervals or sequential structure) does not carry as much anomaly signal as the beat shape itself. Essentially, anomalous beats are occurring at the normal 
+        times, but the execution of the beat is what makes it different.</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>ROC AUC</th><th>PR AUC</th><th>F1 Score</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>.604</td><td>.142</td><td>.208</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Key Insights</h2>
+    <p>This analysis project demonstrated that <strong>morphology is a more effective indicator of cardiac anomalies than beat sequence timing</strong> for this dataset. 
+        The dense autoencoder significantly outperformed the LSTM-based approach. This suggests that anomaly detection in ECG data should prioritize shape-based modeling 
+        as a first approach. </p>
+    <p><strong>Methodological Decisions and Reasoning</strong></p>
+    <ul>
+        <li><strong>Beat-centered modeling first.</strong> PCA and label distributions pointed toward structural, not temporal, differences
+</li>
+        <li><strong>Dense AE before LSTM AE.</strong> I chose the simpler model first to baseline performance before building and modeling beat timing structures. </li>
+        <li><strong>Sequence modeling as follow-up.</strong> I explored LSTM as a natural progression, but it was ultimately less effective than morphology-based encoding</li>
+        <li><strong>Use of F1 for threshold tuning</strong> Beacuse of class imbalance, F1 was a more informative metric than accuracy. For a look at an anomaly detection 
+            analysis with more equal group size, see my <a href = "nsl_kdd.html" target="_blank" rel="noopener noreferrer"> NSL-KDD dataset analysis.</a></li>
+        <li><strong>Dashboarding.</strong> Building a dashboard notebook to summarize and evaluate the modeling results enabled standardized evaluation and made it 
+            easier to visualize model behavior.</li>
+    </ul>
+
+    <p>This project validated autoencoder-based anomaly detection for biomedical signals and highlighted the importance of selecting modeling paradigms based on where 
+        the anomaly signal is strongest. With well-defined beat shapes and clear signal cleaning, dense models can detect subtle anomalies without requiring complex 
+        sequential context. </p>
+    <p class="mt-5"><a href="https://github.com/vscerra/mitbih_arrhythmia_project" class="btn btn-primary">View Source Code</a></p>
+  </div>
+</body>
+</html>

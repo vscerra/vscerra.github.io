@@ -1,0 +1,33 @@
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Node modules and build output (in case you experiment with JS frameworks)
+node_modules/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Python (if you run any Jupyter notebooks locally)
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Mac OS and Windows hidden files
+*.swp
+*.swo
+ehthumbs.db
+
+# Ignore uploads or test folders if present
+/uploads/
+tests/

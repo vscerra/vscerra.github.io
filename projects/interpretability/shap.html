@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: SHAP</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <h1 class="fw-bold mb-4">Demystifying Model Interpretability: A Deep Dive into SHAP values</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p>So far in this series, we’ve explored PDPs for their global perspective and ICE plots for their individual-level insights. Here, we’ll dive into a tool that elegantly bridges the gap between these two, offering both granular and aggregate views of feature importance. Meet SHAP (Shapley Additive exPlanations) values - a powerful, theoretically grounded approach that lets us peek inside the black box and see how each feature contributes to individual predictions.</p>
+
+    <h2 class="mt-5">TL; DR</h2>
+    <table class="definition-table">
+      <tr>
+        <th colspan="2" class="text-center">SHAP</th>
+      </tr>
+      <tr>
+        <td><strong>What:</strong></td>
+        <td>Decomposes model prediction into feature contributions using game theory (fun!)</td>
+      </tr>
+      <tr>
+        <td><strong>Use When:</strong></td>
+        <td>You want <em>local interpretability</em> and global insights</td>
+      </tr>
+      <tr>
+        <td><strong>Assumptions:</strong></td>
+        <td>Feature independence (but kernel SHAP and tree SHAP try to work around this)</td>
+      </tr>
+      <tr>
+        <td><strong>Alternatives:</strong></td>
+        <td>ICE, LIME, ALE, PDP</td>
+      </tr>
+    </table>
+
+    <h2 class="mt-5">What are SHAP values?</h2>
+    <p>
+      Imagine your model is a team of players working together to make a prediction - say, whether a borrower will default on a loan. Each feature is a player: credit score, income, debt-to-income ratio, age, etc. How much does each of these players <em>contribute</em> to the final prediction? That’s what SHAP values help us understand.
+    </p>
+
+    <p>
+      SHAP comes from game theory and borrows concepts of <strong>Shapley values</strong>, originally designed to fairly distribute the “payout” among players depending on their individual contributions. In machine learning, the “payout” is the model prediction, and SHAP values fairly distribute that prediction across all features.
+    </p>
+
+    <p>
+      What makes SHAP compelling is its strong theoretical guarantees. It’s the only method that satisfies <strong>local accuracy</strong>, <strong>missingness</strong>, and <strong>consistency</strong>. (If your eyes glaze over - don’t worry, we’ll break it down.)
+    </p>
+
+    <h2 class="mt-5">How Does It Work?</h2>
+    <p>Let’s break it down with a food analogy (because who doesn’t love food?).</p>
+
+    <p>
+      Imagine you and three friends contribute to cooking a fancy dinner. The final meal is amazing (naturally). You want to figure out how much credit each friend deserves. One way to do it? Try all combinations of who's in or out of the kitchen. A friend's contribution is the <em>average difference in meal quality</em> when they’re included vs excluded.
+    </p>
+
+    <p>
+      That’s essentially what SHAP does.
+    </p>
+
+    <p>The formula for the SHAP value for a feature is:</p>
+
+    <p class="text-center">
+      \[
+      \phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} \left[ f(S \cup \{i\}) - f(S) \right]
+      \]
+    </p>
+
+    <ul>
+      <li>\( \phi_i \): The SHAP value for feature \( i \)</li>
+      <li>\( F \): The set of all features</li>
+      <li>\( S \): Subset not including \( i \)</li>
+      <li>\( f(S) \): Model prediction using only features in \( S \)</li>
+    </ul>
+
+    <p>
+      This answers: <strong>“Across all possible feature combinations, how much does feature \( i \) change the model’s prediction when added?”</strong> This goes beyond toggling one feature—SHAP considers <em>contextual dependencies</em> across many combinations.
+    </p>
+
+    <h3 class="mt-5">In Practice:</h3>
+    <ul>
+      <li>The prediction = average prediction + SHAP values for each feature</li>
+      <li>Each SHAP value reflects how much a feature “pulled” the prediction up/down</li>
+    </ul>
+
+    <p>Simple 🙂</p>
+    
+    <h2 class="mt-5">Strengths of SHAP Plots</h2>
+    <p>SHAP is one of the most flexible and informative interpretability tools available. It offers:</p>
+    <ul>
+      <li><strong>Local explanations</strong>: You get a breakdown of <em>why</em> the model made a specific prediction for a specific instance</li>
+      <li><strong>Global understanding</strong>: Aggregating SHAP values across many predictions gives you a clear picture of global feature importance.</li>
+      <li><strong>Model agnostic and model specific</strong>: SHAP can be used with any model (via Kernal SHAP) or optimized for specific ones like tree-based models (Tree SHAP).</li>
+      <li><strong>Fantastic visualizations</strong>: Beeswarm plots, waterfall charts, force plots - each gives you a nuanced look into your model's behavior (see the SHAP notebook for examples)</li>
+    </ul>
+
+    <h2 class="mt-5">When to use SHAP</h2>
+    <p>SHAP should be your go-to when:</p>
+    <ul>
+        <li>You want transparency in individual predictions (e.g., explaining to a client why their load is approved)</li>
+        <li>You're debugging a model and want to see if it's relying too heavily on certain features</li>
+        <li>You need to audit a model for fairness, especially when predictions have real-world consequences</li>
+    </ul>
+    <p>Basically, SHAP is great when you need both rigor <em>and</em> clarity - especially in sensitive or high-stakes domains.</p>
+
+    <h2 class="mt-5">Limitations</h2>
+    <p>Of course, SHAP isn't perfect. When a model has many features, calculating SHAP values can be computationally expensive. The other edge of that sword is that SHAP provides a lot of information. Without thoughtful storytelling and interpretation, it's easy to drown in all those hard-won details. It's best used alongside domain knowledge and complemented with tools like PDPs, ICE, or ALE plots</p>
+    <p> Keep in mind, like PDPs, SHAP assumes feature independence, which can produce misleading results when features are strongly correlated.</p>
+
+    <h2 class="mt-5">Final Thoughts</h2>
+    <p>SHAP values offer one of the most complete pictures we have for model interpretability. By connecting individual predictions to feature contributions in a mathematically sound way, SHAP allows you to explain, debug, and ultimately trust your models like never before</p>
+    <p>Where PDPs give you a sense of overall behavior and ICE shows you individual trajectories, SHAP ties it all together - telling you both <em>what</em> the model did and <em>why</em> it did it. If you're going to invest in learning one interpretability tool in-depth, SHAP might be the one.</p>
+    <p>Luckily, you don't have to pick just one! In my next post, I'll explore another rising interpretability technique - <strong>Accumulated Local Effects</strong> (ALE) plots, which are designed to overcome some of the key limitations of PDPs and SHAP. Stay tuned!</p>
+  </div>
+</body>
+</html>
