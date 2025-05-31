@@ -2,7 +2,7 @@
 
 This is my personal data science portfolio website, showcasing my projects in machine learning, model interpretability, anomaly detection, reinforcement learning, and more.
 
-🌐 **Live Site**: [https://vscerra.github.io/my-website](https://vscerra.github.io/)
+🌐 **Live Site**: [https://vscerra.github.io](https://vscerra.github.io/)
 
 ---
 
