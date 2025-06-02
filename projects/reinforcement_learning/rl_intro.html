@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get the Behavior You Want: A Gentle Introduction to Reinforcement Learning</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      padding: 2rem;
+      line-height: 1.6;
+      background-color: #fdfdfd;
+      color: #333;
+    }
+    h1, h2, h3 {
+      margin-top: 2rem;
+    }
+    ul {
+      margin-bottom: 1.5rem;
+    }
+    .lead {
+      font-size: 1.25rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="rl_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Reinforcement Learning</a>
+
+  <div class="container">
+    <h1 class="display-5">Get the Behavior You Want: A Gentle Introduction to Reinforcement Learning</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">Learning by trial, error, and triumph</p>
+
+    <p>When I was in the experimental psychology master’s program at Old Dominion University, the most impactful book I read was called “Don’t Shoot the Dog: 
+        The New Art of Teaching and Training” by Karen Pryor. It explores the basis of reinforcement and punishment, and how they facilitate learning. Essentially, 
+        if you want to <em>increase</em> the likelihood of a behavior, you <em>reinforce</em> it through either positive or negative means. 
+</p>
+
+<p> For instance, I’m addicted to caffeine. I need my cup of coffee in the morning (and mid-morning, and afternoon).  Caffeine is a positive reinforcer to our brains, 
+    in fact, caffeine is so rewarding that anything you do while drinking coffee will also be reinforced. Now let’s couple that with some societal reinforcers: Seattle 
+    is a coffee town, which means that I have several options besides my own kitchen for grabbing a little coffee treat. If I go somewhere that feels charming, has a 
+    lively atmosphere and friendly people, then my addiction can be satisfied with an extra helping of societal approval - more positive rewards. Pretty soon, I just 
+    don’t feel like I’m enjoying a day as much if I <em>don’t</em> go get my daily dose of legal addictive stimulant in a bright and friendly place. The positive rewards have 
+    stacked up, and my coffee drinking as well as my cafe patronage are well-reinforced. On the other hand, if I decide to skip my coffee, maybe in some attempt to ease 
+    off of the caffeine, I will suffer a terrible headache (the other half of the Faustian bargain between reward and addiction). When that happens, the best and fastest 
+    way to clear the headache is consuming caffeine. In this case, the behavior of drinking coffee is still being reinforced, but this time <em>negatively</em>. A positive 
+    reinforcer makes a behavior more likely by giving you something you want in return for doing the behavior - a dose of caffeine, a friendly social interaction, a 
+    feeling of community. A negative reinforcer makes a behavior more likely by removing something negative when you do the behavior - I drink the coffee whether I want 
+    it or not, because <em>not doing it</em> will lead to unpleasant side-effects. In both cases, the behavior is being encouraged. Reinforced. Animals, including humans, are so 
+    deeply attuned to reinforcement that while we shape our behaviors and lives around it, we might not even consciously recognize the rewards.
+</p>
+
+<p>Okay, but aren't we talking about machines? Machines do not have our intrinsic animal need for reward, but if we tell them they do, they can behave just as well. 
+    The way humans learn by taking action, seeing what works, adjusting strategy, and trying again can be translated to machines quite easily - <strong>action, feedback, 
+    adaptation</strong> - this behavioral loop is the heart of <strong>Reinforcement Learning</strong> (RL). As one of the most intuitive and powerful branches of machine 
+    learning, RL mimics the way organisms learn: by interacting with the environment and adjusting behavior based on rewards and penalties.</p>
+
+    <p>At its core, RL isn't about labels or predictions - it's about decision making. An agent learns a policy, aka a strategy for choosing actions that will maximize 
+        some notion of cumulative reward over time. The context can be flying a glider, playing chess, controlling a robot, or balancing a portfolio - the structure 
+        remains remarkably consistent.</p>
+
+    <h2>The Basic Ingredients</h2>
+    <p>Inspired by behavioral psychology and grounded in formal mathematics, RL formalizes the learning process through a few key components:</p>
+<ul>
+    <li><strong>Agent</strong>: The learner or decision maker</li>
+    <li><strong>Environment</strong>: Everything the agent interacts with</li>
+    <li><strong>State</strong>: The current situation of the environment</li>
+    <li><strong>Action</strong>: A choice the agent makes</li>
+    <li><strong>Reward</strong>: Feedback received after taking an action</li>
+    <li><strong>Policy</strong>: The strategy for choosing actions based on state</li>
+    <li><strong>Value Function</strong>: An estimate of future reward</li>
+</ul>
+    <p><strong>Put all of these together and  you get a feedback loop:</strong></p>
+<p>
+        <span style="color: blue;">Agent takes an action</span> &rarr;
+        <span style="color: green;">Environment responds</span> &rarr;
+        <span style="color: red;">Agent gets reward</span> &rarr;
+        <span style="color: purple;">Update strategy</span>
+      </p>
+
+<p><strong>In my coffee example above, this is how one run of that might go:</strong></p>
+      <p>
+        <span style="color: blue;">I go to a new cafe for my drink</span> &rarr;
+        <span style="color: green;">The shop is nice, but more expensive than I’m used to</span> &rarr;
+        <span style="color: red;">my coffee is good, but some of the value is reduced because I feel I paid too much</span> &rarr;
+        <span style="color: purple;">I will come back to this cafe if I don’t have any other options</span>
+      </p>
+
+ <p><strong>In a different coffee run:</strong></p>
+      <p>
+        <span style="color: blue;">I go to a cafe for my drink</span> &rarr;
+        <span style="color: green;">The staff is friendly, the prices are good</span> &rarr;
+        <span style="color: red;">I am pleased with my experience and my purchase</span> &rarr;
+        <span style="color: purple;">I will come again whenever I am able</span>
+      </p>
+
+      <p>The above examples are to emphasize that this loop, although seemingly simple, can be very sensitive to environment and rewards. Policy doesn’t have 
+        to be as simple as “Yes, do this” or “No, don’t do this”, you can make your RL strategy as nuanced and responsive as you like, and many environmental 
+        factors can influence the rewards.</p>
+    </div>
+
+    <h2>Origins in Psychology, Evolution with Computing</h2>
+    <p>As I mentioned above, my first appreciation for RL came from my time in psychology. RL has its origins in behavioral psychology and control theory. 
+        Techniques like <strong>temporal difference learning</strong> and <strong>dynamic programming</strong> set the stage for more computational approaches. 
+        In the 1990s and 2000s RL really began to crystallize into a distinct subfield, thanks in part to the foundational work by Richard Sutton and Andrew Barto. 
+</p>
+<p>One of the earliest and clearest illustrations of RL’s power is the <strong>multi-armed bandit problem</strong> - something I explore in detail in another post. 
+    It’s a deceptively simple setup that models how agents deal with uncertainty and the exploration/exploitation tradeoff. </p>
+
+    <h2>From Simple Bandits to Deep Reinforcement Learning</h2>
+    <p>As computing power and data availability grew, RL evolved:</p>
+    <h4>Tabular Methods</h4>
+    <ul>
+        <li><strong>Q-learning and SARSA</strong> used lookup tables to estimate action values for each state.</li>
+        <li>Tabular methods are great for small, discrete environments but quickly become infeasible as the number of states grows</li>
+    </ul>
+    <h4>Policy Gradient Methods</h4>
+     <ul>
+        <li>These algorithms learn the policy directly rather than using a value function.</li>
+        <li>Ideal for continuous action spaces where stochasticity (randomness) is beneficial.</li>
+    </ul>
+    <h4>Functional Approximation and Deep RL</h4>
+<ul>
+    <li><strong>Deep Q-Networks (DQN)</strong> and <strong>Actor-Critic methods</strong> introduced neural networks as function approximators. </li>
+    <li>These allow RL to scale to complex, high-dimensional tasks like playing Atari games from pixels, or controlling robotic arms to perform tasks</li>
+    <li>Architectures like <strong>Proximal Policy Optimization (PPO)</strong> and <strong>Soft Actor-Critic (SAC)</strong> improve stability and sample efficiency
+</li>
+</ul>
+
+    <h2>Reinforcement Learning in the Wild</h2>
+    <p>RL now powers some of the most impressive feats in modern AI, for example:
+</p>
+<ul>
+        <li><strong>AlphaGo/AlphaZero</strong>: Mastering Go and Chess through self-play
+</li>
+        <li><strong>Autonomous driving</strong> and <strong>drone flight</strong>
+
+</li>
+        <li><strong>Recommender systems</strong>: Adapt to user behavior in real time</li>
+        <li><strong>Robotics, energy optimization, personalization</strong> and beyond </li>
+    </ul>
+    <p>It’s not just about flash and competition. RL is increasingly important in real-world decision systems where outcomes unfold over time and uncertainty is high. 
+        RL could be the key to automating and optimizing processes that can help everyone live better and more sustainable lives. 
+</p>
+
+    <h2>Challenges and Caveats</h2>
+    <p>RL is very powerful, but not without obstacles. 
+</p>
+    <p><strong>Sample Inefficiency.</strong>In research settings, agents will often require millions of trials or interactions to learn. In complex environments with 
+        many moving parts, a single trial will tell us very little. Deep RL is taking steps toward easing the burden of millions of trials. 
+</p>
+    <p><strong>Exploration versus Exploitation.</strong>Without enough incentive to explore many options, agents can get stuck in a local strategy that is suboptimal. 
+        A good RL system needs to balance collecting reward (exploitation) with attempts to find new and better rewards (exploration). </p>
+    <p><strong>Reward Design.</strong> Bad incentives can lead to bad behavior. It is important to have ethical and principled reward designs and motivations.</p>
+    <p><strong>Safety and Alignment.</strong> In high-stakes settings, unsafe exploration is unacceptable. </p>
+    <p><strong>Interpretability.</strong> Understanding <em>why</em> an agent does what it does can be a challenge in the more advanced black-box systems of Deep RL. </p>
+
+    <h2>Where We're Headed</h2>
+    <p>The future of RL is very exciting. Here are a few things I’m looking forward to discussing further:</p>
+<ul>
+    <li><strong>Offline RL:</strong>Learning from previously collected data can make RL more practical for real-world applications. </li>
+    <li><strong>Multi-Agent Systems:</strong>Agents that learn from each other and collaborate to compete with others. A whole little agent ecosystem. </li>
+    <li><strong>Hierarchical RL:</strong> Breaking down complex problems into sub-goals and modular reusable skills. </li>
+    <li><strong>Causal RL:</strong> Moving beyond correlations between actions and rewards toward understanding cause and effect. </li>
+    <li><strong>Neuro-Symbolic RL:</strong> Combining symbolic reasoning with learned policies to generalize more flexibly. 
+</li>
+</ul>
+    <p>And perhaps most importantly: <strong>Human-in-the-loop RL</strong>, where systems learn not just from raw data, but from preferences, corrections, and 
+        collaborations with human users! 
+</p>
+
+    <h2>Final Thoughts</h2>
+    <p>Reinforcement learning is not just about solving puzzles or controlling environments - it’s a window into how adaptive systems learn and thrive through 
+        trial and error. Like many of the fascinating jumps from animal behavior and decision-making, to formalized computational processes, and ultimately back again, 
+        we can learn more about ourselves by teaching behavior to machines, and exploring how that interacts with our world. From bandits to AlphaGo, RL has evolved 
+        from a curiosity to a cornerstone of modern AI.</p>
+    
+  </div>
+</body>
+</html>
