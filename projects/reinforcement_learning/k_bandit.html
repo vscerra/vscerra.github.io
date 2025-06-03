@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The k-Armed Bandit: Reinforcement Learning's Toy Soldier</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding: 4rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    img { max-width: 100%; height: 400px; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="rl_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Reinforcement Learning</a>
+  <div class="container">
+    <h1 class="display-5">The k-Armed Bandit: Reinforcement Learning's Toy Soldier</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">A ground-up exploration of Reinforcement Learning methods and models.</p>
+    <p>I am not someone who likes to jump into the middle of anything. If I find something interesting, I have to go back to its origins and build from the bottom. 
+        Any addition to my mind palace has to be built from the ground-up. I know - beginnings are messy, unpolished, and often too 
+        simplistic to have much cache, especially in areas where the newest advancements are generating so much excitement, but I feel like I can't fully understand 
+        where we are unless I know whever we've been. To that end, my interest in reinforcement learning (RL) algorithms has to start with a thorough appreciation for 
+        k-armed bandits and how they can be used to illustrate the principles of RL. </p>
+    
+        <p>The beauty of RL is that it offers a framework for decision making under uncertainty - where an agent <em>learns</em> to take actions that maximize cumulative 
+        reward through trial and error. A natrual starting point for exploring RL is the <strong>k-armed bandit problem</strong>, a simplified scenario that captures the 
+        fundamental exploration-exploitation tradeoff at the heart of RL.</p>
+</p>
+
+    <h2>What is a k-Armed Bandit?</h2>
+    <p>Imagine a row of <em>k</em> slot machines (also called "bandits" because they <em>will</em> take your money), each with an unknown and potentially different
+    probability of paying out a reward (called a reward distribution). Your task is to play the machines one at a time to maximize your total reward over time. In this 
+    scenario, each choice you make involves a decision: Do you <strong>exploit</strong> the arm that has given the highest reward so far? Or do you <strong>explore</strong> 
+    less-tested arms to see if they might be better? This tension between exploration and exploitation is what makes the problem - and reinforcement learning - both 
+    intellectually rich, and practically valuable. </p> 
+    <p>Sure, you like your dentist, but maybe this new dentist closer to your home might be better. Do you explore a new options for your next cleaning, 
+    possibly at a loss (but also possibly for the better), or do you stay where you are, even if it's not ideal, because you know what you're getting there? These are 
+    decisions we make all the time, and we can teach machines to make them with high effiency to maximize reward</p>
+
+    <h2>Algorithms Explored</h2>
+    <p>To start my series, I've implemented and compared several foundational algorithms for solving the k-armed bandit problem. Each one balanced exploration and 
+        exploitation differently:
+    <ol>
+        <strong><li>Greedy Algorithm</strong>
+            <ul>
+                <li>Always selects the action with the highest estimated value. Always.</li>
+                <li>Simple, but prone to getting stuck in local optima due to lack of exploration.</li>
+            </ul>
+        <strong><li>Epsilon-Greedy</li></strong>
+            <ul>
+                <li>With probability <code>&epsilon;</code>, it chooses a random arm (exploration); otherwise it chooses the greedy option (exploitation).</li>
+                <li>Introduces a tunable exploration parameter to improve learning.</li>
+            </ul>
+        <strong><li>Upper Confidence Bound (UCB)</strong></li>
+            <ul>
+                <li>Selects the arm with the highest upper confidence bound based on reward uncertainty.</li>
+                <li>More principled exploration that balances high mean rewards and low sampling frequency.</li>
+            </ul>
+        <strong><li>Gradient Bandits</li></strong>
+            <ul>
+                <li>Uses a softmax policy to update preferences over actions using gradient ascent on expected reward.</li>
+                <li>Particularly useful in non-stationary environments (aka: environments where the rewards are not fixed) and for learning stochastic policies</li>
+            </ul>
+        <strong><li>Thompson Sampling</li></strong>
+            <ul>
+                <li>A Bayesian approach that maintains a probability distribution over the expected reward of each arm.</li>
+                <li>At each time step, it samples from these distributions and selects the arm with the highest sampled value.</li>
+                <li>Naturally balances exploration and exploitation: arms with more uncertainty are more likely to be chosen early on, while arms with higher observed
+                    rewards dominate over time. </li>
+            </ul>
+    </ol>
+
+    <p>Thompson Sampling is particularly effective in environments with sparse data, or non-stationary rewards, and is computationally efficient while performing 
+        near-optimally in many theoretical and empirical settings.</p>
+
+<h2>Visual Insights and Experimental Notebook</h2>
+    <p>The notebook that corresponds with this post (found <a href="https://github.com/vscerra/reinforcement_learning/blob/main/notebooks/bandit_experiments.ipynb">here</a>) 
+          illustrates:
+          <ul>
+            <li>Real-time action-value estimates </li>
+            <li>Trade-offs in parameter settings </li>
+            <li>Comparative performance across different random seeds</li>
+            <li>Mathematical formulation for each algorithm</li>
+          </ul>
+    <p>This work lays the foundation for more complex reinforcement learning problems like multi-step decision making, function approximation, and dynamic environments.</p>
+</p>
+
+ <h2>General Model Comparison</h2>
+ <table class="table table-striped mt-4">
+  <thead>
+    <tr>
+      <th><strong>Algorithm</strong></th>
+      <th><strong>Strengths</strong></th>
+      <th><strong>Weaknesses</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Greedy</strong></td>
+      <td>Simple, fast</td>
+      <td>Gets stuck in suboptimal actions</td>
+    </tr>
+    <tr>
+      <td><strong>Epsilon-Greedy</strong></td>
+      <td>Simple balance of exploration</td>
+      <td>Doesn't adapt exploration dynamically</td>
+    </tr>
+    <tr>
+      <td><strong>UCB</strong></td>
+      <td>Uses confidence intervals for exploration</td>
+      <td>Assumes rewards are stationary</td>
+    </tr>
+    <tr>
+      <td><strong>Gradient Bandit</strong></td>
+      <td>Works well for continuous rewards</td>
+      <td>Sensitive to learning rate <strong>&alpha;</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Thompson Sampling</strong></td>
+      <td>Optimally balances exploration/exploitation</td>
+      <td>Requires Bayesian modeling</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>What's Next?</h2>
+    <p>Having built a strong foundation with bandits, I plan to expand this series into:
+        <ul>
+            <li><strong>Non-stationary bandits</strong> with decaying reward probabilities</li>
+            <li><strong>Contextual bandits</strong>, incorporating features for smarter decision making</li>
+            <li><strong>Markov Decision Processes (MDPs) </strong>and multi-step environments</li>
+            <li><strong>Q-learning and SARSA </strong>algorithms</li>
+            <li><strong>Deep Reinforcement Learning</strong> using neural networks to approximate value functions (<em>the good stuff</em>)</li>
+        </ul>
+</p>
+    <p>This ongoing series project aims to demystify reinforcement learning concepts through hands-on code, clear explanations, and visualizations. Learn with me!</p>
+    <p class="mt-5"><a href="https://github.com/vscerra/reinforcement_learning" class="btn btn-primary">View Repository</a></p>
+  </div>
+</body>
+</html>
