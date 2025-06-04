@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: ALE</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <h1 class="fw-bold mb-4">Demystifying Model Interpretability: A Deep Dive into Accumulated Local Effects (ALE) Plots</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p>In previous posts, I dove into Partial Dependence Plots (PDPs) for their global perspective, Individual Conditional Expectation (ICE) plots for their 
+        local granularity, and SHAP values for their fair, game-theoretic feature attribution. Each of the above tools carry and important caveat, however, 
+        they <strong>don’t handle feature correlation well. </strong></p>
+
+    <p>Enter <strong>Local Accumulated Effects (ALE) plots</strong> - a relatively new player in the interpretability game that was devised from the ground-up 
+        to avoid the trap of correlated features. ALE plots retain the interpretability goals of PDP and ICE, while offering faster computation and greater robustness 
+        in real-world, messy datasets. 
+</p>
+
+    <h2 class="mt-5">TL; DR</h2>
+    <table class="definition-table">
+      <tr>
+        <th colspan="2" class="text-center">ALE</th>
+      </tr>
+      <tr>
+        <td><strong>What:</strong></td>
+        <td>Capture local effects of features on predictions, averaged over the conditional distribution of the data</td>
+      </tr>
+      <tr>
+        <td><strong>Use When:</strong></td>
+        <td>You want global interpretability <em>and</em> want to handle correlated features better than PDPs or SHAP</td>
+      </tr>
+      <tr>
+        <td><strong>Assumptions:</strong></td>
+        <td>Minimal - doesn’t require independence between features</td>
+      </tr>
+      <tr>
+        <td><strong>Alternatives:</strong></td>
+        <td>ICE, SHAP, PDP</td>
+      </tr>
+    </table>
+
+    <h2 class="mt-5">What is an ALE Plot?</h2>
+    <p>
+      Let’s use a new analogy. Suppose you’re hiking a mountain trail and tracking the elevation gain over time. A <strong>PDP</strong> is like calculating the average 
+      elevation gain if you just walked straight up the mountain (ignoring switchbacks). It might tell you the general trend, but it glosses over a lot 
+      of the nuance. An <strong>ICE</strong> plot could walk you through each person’s specific path up the mountain, which could be helpful, but would be too much if you 
+      had data from thousands of hikers. ALE plots, on the other hand? <strong>ALE</strong> breaks the trail into small segments (e.g., every 10 meters), and calculates the 
+      <em>local</em> elevation gain in each segment (i.e., the slope right there), and then accumulates these changes as you go along the trail. This gives you a picture 
+      of how steep things are, without assuming all hikers are walking the same path.</p>
+
+    <p>
+      In machine learning terms, ALE computes the average change in prediction over small intervals of a feature, based on <strong>actual values present in the data</strong>, 
+      making it more reliable when features are correlated.</p>
+
+    <h2 class="mt-5">How Does It Work?</h2>
+    
+    <p>For a given feature \( x_j \):</p>
+
+    <p class="text-center">
+      \[
+      \hat{f}_j^{\text{ALE}}(x_j) = \int_{z_0}^{x_j} \mathbb{E}_{x_{-j} \mid x_j = z} \left[ \frac{\partial \hat{f}(z, x_{-j})}{\partial z} \right] dz
+      \]
+    </p>
+
+    <ul>
+      <li>\( \hat{f}_x \): The prediction function learned by the model</li>
+      <li>\( x_j \): the feature of interest (the one for which we are plotting ALE)</li>
+      <li>\( x_{-j} \): all other features (i.e., the complement of \( x_j \))</li>
+      <li>\( z \): a dummy integration variable used to traverse the values of \( x_j\)
+</li>
+      <li>\( \mathbb{E}_{x_{-j} \mid x_j = z} \left[ . \right] \): the expected value of the distribution of all other features, conditioned on the feature of interest being \( z\) </li>
+      <li>\( \frac{\partial \hat{f}(z, x_{-j})}{\partial z} \): the partial derivative of the model prediction w.r.t. the feature \( x_j \) at point \( z \), keeping other features fixed</li>
+      <li>\( \hat{f}_j^{\text{ALE}}(x_j) \): the ALE of feature \( x_j \) at the value \( x_j \); the total accumulated effect up to that value</li>
+      <li>\( z_0 \): the lower bound of the feature’s domain (e.g., minimum observed value) - the integration “anchor point”
+</li>
+    </ul>
+
+    <p>
+      I get it, it looks scary, but it just means: accumulate the average local changes in the model’s prediction as you step through the feature’s values. 
+      Crucially, these averages are computed <strong>only where data actually exists</strong> - not extrapolation into unrealistic combinations.
+    </p>
+
+    <h3 class="mt-5">In Practice:</h3>
+    <ol>
+      <li>Choose a feature and divide its values into intervals (e.g., deciles)</li>
+      <li>For each interval:</li>
+      <ol>
+        <li>Identify all instances that fall into that interval</li>
+        <li>For each, compute the prediction differences when the feature value increases slightly</li>
+      </ol>
+      <li>Average those differences within the interval</li>
+      <li>Accumulate the differences across the feature range, anchoring the plot at zero.</li>
+    </ol>
+    <p>The result is a clean, readable plot that shows how predictions <em>locally</em> change with the feature without being distorted by unrealistic data configurations. 
+</p>
+    <p>Simple 🙂</p>
+    
+    <h2 class="mt-5">Strengths of ALE Plots</h2>
+    <ul>
+      <li><strong>Handle correlated features gracefully</strong>: Since ALE breaks the feature range into bins, and only looks at changes to feature effect within that bin, predictions are considered in the context of the local data distribution</li>
+      <li><strong>Global interpretability </strong> that reflects local behavior.</li>
+      <li><strong>Work with any black box models</strong>: ALE doesn't require any access to the model's internal workings. No need to crack the model open, just measure how it reacts when you poke it in realistic, local ways</li>
+      <li><strong>Less computationally expensive than SHAP</strong></li>
+      <li><strong>Avoid unrealistic extrapolation by conditioning on the data distribution</strong></li>
+    </ul>
+
+    <h2 class="mt-5">When to use ALE plots</h2>
+    <p>Use ALE when:</p>
+    <ul>
+        <li>Your features are correlated, and you suspect PDPs may be misleading</li>
+        <li>You want a balance between interpretability and computational efficiency</li>
+        <li>You need a clean, principled visualization of feature effects without overfitting to rare data scenarios
+</li>
+    </ul>
+    <p>They shine in real-world data problems (think credit risk, medical outcomes, pricing models), where features often dance together in complex, interdependent ways.</p>
+
+    <h2 class="mt-5">Limitations</h2>
+    <p>ALE plots assume that local perturbations of features are meaningful - so if your model behaves erratically or non-smoothly across the feature space, the local 
+        differences might not be representative. Also, while ALE plots handle first-order effects beautifully, interpreting second-order (interaction) ALE plots can 
+        get dicey. </p>
+    <p>While it’s more robust than PDPs, ALE still requires thoughtful feature engineering - as ever: \( f_{(garbage)} = garbage \) </p>
+
+    <h2 class="mt-5">Final Thoughts</h2>
+    <p>If PDPs give you a high level map of the terrain, and ICE shows you individual paths, <strong>ALE is the terrain map drawn from the actual trails people walk</strong>. 
+        It’s trustworthy, interpretable, and highly informative - especially when features interact in complex, real-world ways. </p>
+
+    <p>Use ALE when you’re tired of being betrayed by correlated features, and you want a clear, averaged view of local model behavior. 
+        It doesn’t give you everything, but it gives you something you can <em>actually</em> use. </p>
+
+    <p>In my next post, I'll discuss <strong>Local Interpretable Model-agnostic Explanations</strong> (LIME), for when you want to know <em>why</em> your model made that prediction. Stay tuned!</p>
+  </div>
+</body>
+</html>
