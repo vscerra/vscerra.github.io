@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: ALE</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <section id="references">
+  <h1>Primary References</h1>
+
+  <!--         PDP REFS       --> 
+
+  <h3>Partial Dependence Plots (PDPs)</h3>
+  <ul>
+    <li>
+      Friedman, J.H. (2001). 
+      <em>Greedy Function Approximation: A Gradient Boosting Machine</em>. 
+      <a href="https://doi.org/10.1214/aos/1013203451" target="_blank" rel="noopener noreferrer">
+        Annals of Statistics, 29(5), 1189–1232.
+      </a>
+      <p><strong>Introduces PDPs as a method to interpret the effect of features in ensemble methods. Foundational academic paper for PDPs.</strong></p>
+    </li>
+    <li>
+        Greenwell, B.M. (2017).
+        <em>pdp: An R Package for Constructing Partial Dependence Plots</em>. 
+        <a href="https://journal.r-project.org/archive/2017/RJ-2017-016/index.html" target="_blank" rel="noopener noreferrer">
+          The R Journal, 9(1), 421-436.   
+        </a>
+        <p><strong>A detailed description of PDP implementation and interpretation.</strong></p>
+    </li>
+    </ul>
+
+    <!--     ICE REFS         -->
+
+    <h3>Individual Conditional Expectation (ICE)</h3>
+    <ul>
+        <li>Goldstein, A., Kapelner, A., Bleich, J., & Pitkin, E. (2015).<em> Peeking inside the black box: Visualizing statistical learning with plots of individual conditional expectation</em>. 
+            <a href="https://doi.org/10.1080/10618600.2014.907095" target="_blank" rel="noopener noreferrer">
+                Journal of Computational and Graphical Statistics, 24(1), 44-65.
+            </a>
+        </li>
+        <p><strong>Canonical ICE paper, introduces ICE plots as an extension to PDPs that can handle individual-level variation.</strong></p>
+    </ul>
+
+    <!--     SHAP REFS       -->
+
+    <h3>Shapely Additive Explanations (SHAP)</h3>
+    <ul>
+    <li>
+      Lundberg, S.M., & Lee, S.-I. (2017). 
+      <em>A Unified Approach to Interpreting Model Predictions</em>. 
+      <a href="https://proceedings.neurips.cc/paper_files/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html" target="_blank" rel="noopener noreferrer">
+        NeurIPS 30.
+      </a>
+    </li>
+        <p><strong>Proposes the SHAP framework and connects Shapley values from cooperative game theory to model interpretability</strong></p>
+        <li>
+      Strumbelj, E., & Kononenko, I. (2014).
+      <em>Explaining prediction models and individual predictions with feature contributions</em>. 
+      <a href="https://doi.org/10.1007/s10115-013-0679-x" target="_blank" rel="noopener noreferrer">
+        Knowledge and Information Systems, 41(3), 647-665. 
+      </a>
+    </li>
+        <p><strong>Early work establishing the game-theoretic approach to explaining individual predictions, which inspired SHAP</strong></p>
+    </ul>
+
+    <!--      ALE REFS      -->
+
+    <h3>Accumulated Local Effects</h3>
+    <ul>
+        <li>Apley, D.W., & Zhu, J. (2020). 
+      <em>Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models</em>. 
+      <a href="https://doi.org/10.1111/rssb.12377" target="_blank" rel="noopener noreferrer">
+        Journal of the Royal Statistical Society: Series B, 82(4), 1059–1086.
+      </a></li>
+        <p><strong>Introduces ALE plots as an improvement over PDPs for cases with correlated features.</strong></p>
+    </ul>
+
+    <!--      LIME REFS     -->
+
+    <h3>Local Interpretable Model-agnostic Explanations (LIME)</h3>
+    <ul>
+        <li>
+      Ribeiro, M.T., Singh, S., & Guestrin, C. (2016). 
+      <em>“Why Should I Trust You?”: Explaining the Predictions of Any Classifier</em>. 
+      <a href="https://doi.org/10.1145/2939672.2939778" target="_blank" rel="noopener noreferrer">
+        Proceedings of the 22nd ACM SIGKDD.
+      </a>
+    </li>
+        <p><strong>Original LIME paper introducing local surrogate modeling as a tool for explaining black-box predictions.</strong></p>
+    </ul>
+
+    <!--      General Interpretability Refs    -->
+
+    <h3>General Interpretability Frameworks</h3>
+    <ul>
+    <li>
+      Molnar, C. (2023). 
+      <em>Interpretable Machine Learning</em>. 
+      <a href="https://christophm.github.io/interpretable-ml-book/" target="_blank" rel="noopener noreferrer">
+        Online Book.
+      </a>
+      </li>
+      <p><strong>Comprehensive and open-access book in the subject of model interpretability. Covers PDPs, SHAP, ICE, ALE, LIME, and more in theory and code</strong></p>
+    
+    <li>
+      Hooker, G. (2007). 
+      <em>Generalized Functional ANOVA Diagnostics for High-Dimensional Functions of Dependent Variables</em>. 
+      <a href="https://doi.org/10.1198/106186007X237892" target="_blank" rel="noopener noreferrer"> 
+        Journal of Computational and Graphical Statistics: 16(3), 709=732. </a>
+    </li>
+    <p><strong></strong></p>
+  </ul>
+
+</section>
+
+  </div>
+</body>
+</html>
