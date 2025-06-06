@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sentiment Analysis with NLP</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Custom Style (linked back up to main) -->
+  <link rel="stylesheet" href="../../styles.css">
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .interpretability-header {
+      text-align: center;
+      margin: 4rem 0 2rem;
+    }
+    .interpretability-image {
+      max-width: 100%;
+      height: 200px;
+      width: 200px;
+      border-radius: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .post-card {
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: #8e5e3b;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      color: #754d2f;
+    }
+    .btn-outline-primary {
+      margin-right: 0.75rem;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; Back to Portfolio</a>
+
+    <div class="nlp-header">
+      <h1>Sentiment Analysis with NLP</h1>
+      <img src="images/nlp.png" alt="NLP Splash" class="nlp-image">
+      <p class="lead text-muted">
+        
+      </p>
+    </div>
+
+    <!-- Logistic Regression vs. Naive Bayes -->
+<div class="post-card row align-items-center">
+  <div class="col-md-8">
+    <h3 class="fw-bold">Logistic Regression vs. Naive Bayes</h3>
+    <p class="text-muted"></p>
+    <!--<a href="LRNB.html" class="btn btn-outline-primary">Read More</a>-->
+    <a href="https://github.com/vscerra/Sentiment_Analysis/notebooks/LogReg_vs_NaiveBayes_SentimentAnalysis.ipynb" class="btn btn-outline-secondary" target="_blank">Notebook</a>
+  </div>
+  <div class="col-md-4 text-center">
+    <img src="images/nb_cm.png" alt="NB preview" class="img-fluid rounded shadow-sm" style="max-height: 150px;">
+  </div>
+</div>
+
+<!-- CBOW NN -->
+<div class="post-card row align-items-center">
+  <div class="col-md-8">
+    <h3 class="fw-bold">Continuous Bag-of-Words (CBOW) Neural Network Model</h3>
+    <p class="text-muted"></p>
+    <!--<a href="cbownn.html" class="btn btn-outline-primary">Read More</a>-->
+    <a href="https://github.com/vscerra/Sentiment_Analysis/notebooks/CBOW_NN_SentimentAnalysis.ipynb" class="btn btn-outline-secondary" target="_blank">Notebook</a>
+  </div>
+  <div class="col-md-4 text-center">
+    <!--<img src="images/nb_cm.png" alt="NB preview" class="img-fluid rounded shadow-sm" style="max-height: 150px;">-->
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
