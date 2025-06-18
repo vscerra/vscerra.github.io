@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markov Decision Processes: Formulating the Best Possible Decisions</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  
+  <style>
+    body { padding: 4rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    img { max-width: 100%; height: 400px; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="rl_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Reinforcement Learning</a>
+  <div class="container">
+    <h1 class="display-5">Markov Decision Processes: Formulating the Best Possible Decisions</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">A ground-up exploration of Reinforcement Learning methods and models.</p>
+    <p>Reinforcement learning is the science of learning to make decisions, or conversely, teaching machines to make decisions based on 
+        environmental variables. In our discussion of k-armed bandits, I introduced the idea of actions - multiple actions that can be 
+        taken in a situation, but the model in that situation is one of actions and rewards. This brings us to Markov Decision Processes 
+        (MDPs), which formalize the problem with a full sequential structure. If we assume that the environment is fully observable, and 
+        we also assume that the current observation contains all of the relevant information for understanding our state and options, then 
+        we can create a model of best choices in our current state for maximum reward. In an MDP, actions not only influence immediate 
+        rewards, but also future rewards through subsequent situations and states, all of which are, or can be, known. In the bandit 
+        problem, we estimated the value of each action taken, in MDPs, we extend that to estimate the value of each action in each state, 
+        or we estimate the value of each state given <em>optimal</em> action selections. In the model for a MDP,  the learner or decision maker is 
+        called the <strong>agent</strong>, and the things the agent interacts with are the <strong>environment</strong>. 
+ </p>
+
+    <h2>The Key Players in an MDP</h2>
+    <p>The key elements that comprise an MDP model are as follows:</p>
+    <ol> 
+        <strong><li>State (S)</strong>: <em>"Where am I?"</em></li>
+        <ul>
+            <li>Represents the situation the agent is in at a given time point (<em>t</em>)</li>
+            <li>Can be physical locations (e.g., grid positions), system status (e.g., health levels), or abstract configurations</li>
+            <li>The agent starts in some state \( s &isin; S \)</li>
+        </ul>
+        <strong><li>Actions (A)</strong>: <em>"What can I do?"</em></li>
+        <ul>
+            <li>A set of choices available to the agent in any given state</li>
+            <li>Denoted as \( a(s) \): actions available in state \( s \)</li>
+            <li>The agent selects an action \( a &isin; A(s) \) to try and maximize its future reward</li>
+        </ul>
+        <strong><li>Transition Probabilities (P)</strong>: <em>"What happens if I act?"</em></li>
+        <ul>
+            <li>Define the dynamics of the environment: \( P(s'|s, a) \) = Probability of ending in state \( s' \) after taking 
+            action \( a \) in state \( s \)</li>
+            <li>The probability used in this formulation captures <strong>stochasticity</strong> - the same action may not always lead to 
+            the same outcome.</li>
+            <li><strong>Interaction</strong>: Given a current state \( s \) and a chosen action \( a \), the environment uses
+            \( P \) to select the next state \( s' \)</li>
+        </ul>
+        <strong><li>Reward Function (R)</strong>: <em>"What do I get?"</em></li>
+        <ul>
+            <li>Tells the agent how good it is to take action \( a \) in state \( s \) and land in state \( s' \)</li>
+            <p>Typical Formulation: </p>
+            <ul>
+                <li>\( R(s, a, s') \): reward for transitioning from state \( s \) to \( s' \) via \( a \)</li>
+                <li>Simplified as \( R(s, a) \) or \( R(s') \), depending on the context</li>
+            </ul>
+            <li><strong>Interaction</strong>: When the agent transitions from \( s \) &rarr; \( s' \) via \( a \), the 
+                reward is given immediately \(r = R(s, a, s') \)</li>
+        </ul>
+        <strong><li>Discount Factor (&gamma;)</strong>: <em>"How much do I care about the future?"</em></li>
+        <ul>
+            <li>A scalar in [0, 1) that determines how future rewards are weighted</li>
+            <li>&gamma; &asymp; 0: agent prefers immediate rewards ("short-sighted")</li>
+            <li>&gamma; &asymp; 1: agent values long-term rewards ("far-sighted")</li>
+            <li><strong>Interaction</strong>: Used when computing cumulative rewards
+            <p class="text-center">
+      \[
+      G_{t} = R_{t+1} + &gamma;R_{t+2} + &gamma;^{2}R_{t+3} + &hellip; = \sum_{k=0}^{&infin;} &gamma;^{k} R_{t+k+1}
+      \]
+    </p>
+                Where <var>t</var> represents the time step and <var>&gamma;</var> is the discount factor
+
+        </ul>
+    </ol>
+
+    <h2>Putting it All Together: The Agent-Environment Loop</h2>
+    <p>At each timestep \(t\)</p>
+    <ol>
+        <li>Agent observes the current <strong>state</strong> \(S_{t}\)</li>
+        <li>Agent chooses <strong>action</strong> \(A_{t}\)</li>
+        <li>Environment samples the <strong>next state</strong> \(S_{t+1}\)</li>
+        <li>Environment provides <strong>reward</strong> \(R_{t+1} = R(S_{t}, A_{t}, S_{t+1})\)</li>
+        <li>Agent updates its value estimates or policy using \((S_{t}, A_{t}, R_{t+1}, S_{t+1})\)</li>
+        <li>Repeat &hellip;</li>
+    </ol>
+    <p>In a <em>finite</em> MDP, the sets of states, actions, and rewards all have a finite number of elements (as opposed to <em>infinite</em>&hellip;)</p>
+
+    <h2>Agent's Learning Objectives: What's the Point?</h2>
+    <p>To what end are we specifying all of these key players and parameterizing the learning system? What does all of this accomplish? 
+</p> 
+    <p><strong>Goals</strong>: In an MDP, the agent’s goal is to find a way to act (a policy) that <strong>maximizes cumulative reward over time</strong>. 
+        Crucially, the goal isn’t to get the biggest reward at one time step, but rather to develop a reliable strategy for maximizing total 
+        expected reward over time. This is a long-term goal that incorporates discount factors for distal vs. proximal rewards, many time 
+        steps, and reliable reward expectations. 
+</p>
+
+    <p>Specifying rewards carefully is crucial to developing a winning strategy for maximizing reward. For example, if you were teaching 
+        an agent to navigate a maze, you would give positive rewards for reaching the end and penalize time spent in the maze to encourage 
+        the agent to complete the maze as quickly as possible. If you wanted a robot to learn how to walk, you would positively reward 
+        forward motion, and negatively reward stumbles, falls, and instability - the machine would soon learn to stabilize and move forward 
+        to avoid the negative rewards and maximize the returns for the episode of walking. In these instances, in this problem formulation 
+        for reinforcement learning, the “purpose” or “goal” can be thought of as the maximization of the expected value of a cumulative 
+        return value, also called reward. </p>
+    
+    <p><strong>Policy</strong>: The policy adopted by an agent answers the question <em>“What should I do to maximize reward?”</em> What 
+        I personally find fascinating about reinforcement learning is that it really is just a formalization of what humans (and all animals)
+         do naturally. You observe patterns, you formulate a plan for getting the most reward (often, you don’t even do it consciously), 
+         and you continually evaluate your returns and adjust your approach. That plan you formulate for getting the best coffee by 
+         standardizing your order, finding the best grocery store by evaluating the pros and cons of getting there/selection/prices/
+         convenience, or choosing which of your neighbors you like best are all examples of adopting a policy for maximizing returns. 
+         Our determination of “good” actions to take is usually based on our expected reward policy. </p>
+
+    <p>Formally, policy is a mapping from states to probabilities of selecting each possible action. The ultimate goal of reinforcement
+         learning is to <strong>find the optimal policy</strong>, denoted \(&pi;^{*}\). The policy is defined to answer the question - 
+         <em>“Given that I’m in state , what action should I take?”</em> Policies can come in two flavors: deterministic and stochastic.</p>
+         <ul>
+            <li><strong>Deterministic Policy</strong>: \(&pi;(s)\) &rarr; always take action \(a\) in state \(s\)</li>
+            <li><strong>Stochastic Policy</strong>: \(&pi;(a|s)\) &rarr; assigns a probability to taking action \(a\) in state \(s\) </li>   
+         </ul>
+    <p><strong>Value Function</strong>: The value function is the formalization assigning expected return to states and actions. It answers 
+        the question - <em>“How good is this action/state?”</em> in the context of possibilities available. Value functions can be assigned 
+        to both states and actions as follows: 
+        <ul>
+            <li><strong>State value function (\(V^{&pi;}(s)\))</strong>
+            <p>"Given the state \(s\), the expected reward will be the following, assuming we take the subsequent actions dictated under our policy \(&pi;\)"
+                    \[
+V^{\pi}(s) = \mathbb{E}_{\pi} \left[ \sum_{t=0}^{\infty} \gamma^t R_{t+1} \,\middle|\, S_0 = s \right]
+\] </p></li>
+            <li><strong>Action value function (\(Q^{&pi;}(s,a)\))</strong>
+            <p>"Given the state \(s\) and action \(a\), the expected reward will be the following, assuming we take the subsequent actions dictated 
+                under our policy \(&pi;\)"
+                \[
+Q^{\pi}(s, a) = \mathbb{E}_{\pi} \left[ \sum_{t=0}^{\infty} \gamma^t R_{t+1} \,\middle|\, S_0 = s, A_0 = a \right]
+\]
+            </p></li>
+        </ul>
+    <p>Once your value functions are specified, it is simple work to select the best action/state combination for your policy to maximize returns</p>
+
+<h2>Putting it All Together: Goals, Policies, and Value Functions</h2>
+<ul>
+    <li>Goals interact with all other elements to find the best policy \(&pi;^{*}\) to maximize expected reward. Goal = “let’s get the best return possible”
+</li>
+    <li>Policy can be either deterministic or stochastic, and the decision for what to is enacted by adopting value functions to maximize returns. 
+        Policy = “We can get the best return by making the following choices..."</li>
+    <li>Value functions guide the policy to estimate anticipated return assuming the current policy is followed. Value function = “These are the expected rewards for making these choices in our current state”
+</li>
+    <li>Feedback loop: Update policy based on value estimates → update value estimates based on new policy (e.g., in policy iteration). </li>
+</ul>
+
+<p>The truly cool thing about a finite MDP is that all of the actions, states, and rewards can be known, so that in any situation a 
+    policy and value functions can be specified and the best path forward to maximize reward can be chosen. Next post will address the 
+    <strong>Bellman Equation</strong>, which ties all of the elements together mathematically. 
+
+<h2>Visual Insights and Experimental Notebook</h2>
+    <p>The notebook that corresponds with this post (found <a href="https://github.com/vscerra/reinforcement_learning/blob/main/notebooks/mdp_gridworld.ipynb">here</a>) 
+          illustrates:
+          <ul>
+            <li>How states and actions affect transitions</li>
+            <li>Reward dynamics and terminations </li>
+            <li>Stochastic transitions in action</li>
+            <li>Visual representations of policy and value iteration</li>
+          </ul>
+    <p>This work lays the foundation for more complex reinforcement learning problems like multi-step decision making, function approximation, and dynamic environments.</p>
+</p>
+
+<h2>What's Next?</h2>
+    <p>Now that we understand the elements contributing to MDPs, I plan to expand this series into:
+        <ul>
+            <li><strong>Non-stationary bandits</strong> with decaying reward probabilities</li>
+            <li><strong>Contextual bandits</strong>, incorporating features for smarter decision making</li>
+            <li><strong>Q-learning and SARSA </strong>algorithms</li>
+            <li><strong>Deep Reinforcement Learning</strong> using neural networks to approximate value functions (<em>the good stuff</em>)</li>
+        </ul>
+</p>
+    <p>This ongoing series project aims to demystify reinforcement learning concepts through hands-on code, clear explanations, and visualizations. Learn with me!</p>
+    <p class="mt-5"><a href="https://github.com/vscerra/reinforcement_learning" class="btn btn-primary">View Repository</a></p>
+  </div>
+</body>
+</html>

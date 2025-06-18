@@ -74,12 +74,12 @@
     <p>To start my series, I've implemented and compared several foundational algorithms for solving the k-armed bandit problem. Each one balanced exploration and 
         exploitation differently:
     <ol>
-        <strong><li>Greedy Algorithm</strong>
+        <strong><li>Greedy Algorithm</strong></li>
             <ul>
                 <li>Always selects the action with the highest estimated value. Always.</li>
                 <li>Simple, but prone to getting stuck in local optima due to lack of exploration.</li>
             </ul>
-        <strong><li>Epsilon-Greedy</li></strong>
+        <strong><li>Epsilon-Greedy</strong></li>
             <ul>
                 <li>With probability <code>&epsilon;</code>, it chooses a random arm (exploration); otherwise it chooses the greedy option (exploitation).</li>
                 <li>Introduces a tunable exploration parameter to improve learning.</li>
@@ -89,12 +89,12 @@
                 <li>Selects the arm with the highest upper confidence bound based on reward uncertainty.</li>
                 <li>More principled exploration that balances high mean rewards and low sampling frequency.</li>
             </ul>
-        <strong><li>Gradient Bandits</li></strong>
+        <strong><li>Gradient Bandits</strong></li>
             <ul>
                 <li>Uses a softmax policy to update preferences over actions using gradient ascent on expected reward.</li>
                 <li>Particularly useful in non-stationary environments (aka: environments where the rewards are not fixed) and for learning stochastic policies</li>
             </ul>
-        <strong><li>Thompson Sampling</li></strong>
+        <strong><li>Thompson Sampling</strong></li>
             <ul>
                 <li>A Bayesian approach that maintains a probability distribution over the expected reward of each arm.</li>
                 <li>At each time step, it samples from these distributions and selects the arm with the highest sampled value.</li>
