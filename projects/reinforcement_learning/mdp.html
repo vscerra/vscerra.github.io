@@ -123,6 +123,8 @@
     </ol>
 
     <h2>Putting it All Together: The Agent-Environment Loop</h2>
+     <img src="images/MDP.png" alt="image of MDP loop" style="width:440px;height:170px;">
+    <p>Depiction of the agent-environment interactions in a MDP, borrowed from Sutton & Barto (2018)</p>
     <p>At each timestep \(t\)</p>
     <ol>
         <li>Agent observes the current <strong>state</strong> \(S_{t}\)</li>
@@ -134,11 +136,7 @@
     </ol>
 <p>In a <em>finite</em> MDP, the sets of states, actions, and rewards all have a finite number of elements (as opposed to <em>infinite</em>&hellip;)</p>
 
-    <img src="images/MDP.png" alt="image of MDP loop" style="width:440px;height:170px;">
-    <p>Depiction of the agent-environment interactions in a MDP, borrowed from Sutton & Barto (2018)</p>
-
-    
-    <h2>Agent's Learning Objectives: What's the Point?</h2>
+   <h2>Agent's Learning Objectives: What's the Point?</h2>
     <p>To what end are we specifying all of these key players and parameterizing the learning system? What does all of this accomplish? 
 </p> 
     <p><strong>Goals</strong>: In an MDP, the agent’s goal is to find a way to act (a policy) that <strong>maximizes cumulative reward over time</strong>. 
