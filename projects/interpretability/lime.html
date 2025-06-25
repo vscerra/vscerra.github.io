@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: LIME</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <h1 class="fw-bold mb-4">Demystifying Model Interpretability: A Deep Dive into Local Interpretable Model-agnostic Explanations</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p>As far as acronyms go, LIME is top tier - remembering it is easy, and it's a word that evokes an idea of brightness. It helps you to 
+        remember that LIME is essentially shining a bright spotlight on a point in your model, recreating the environment around that point 
+        as an interpretable model, and giving you an understanding of what features contribute positively or negatively to the prediction 
+        for that point.</p>
+
+    <h2 class="mt-5">TL; DR</h2>
+    <table class="definition-table">
+      <tr>
+        <th colspan="2" class="text-center">LIME</th>
+      </tr>
+      <tr>
+        <td><strong>What:</strong></td>
+        <td>Approximates a complex model locally by fitting an interpretable surrogate</td>
+      </tr>
+      <tr>
+        <td><strong>Use When:</strong></td>
+        <td>You need insight into individual predictions</td>
+      </tr>
+      <tr>
+        <td><strong>Assumptions:</strong></td>
+        <td>Local linearity and feature independence in the neighborhood of the instance</td>
+      </tr>
+      <tr>
+        <td><strong>Alternatives:</strong></td>
+        <td>ICE, SHAP, ALE, PDP</td>
+      </tr>
+    </table>
+
+    <h2 class="mt-5">What are Local Interpretable Model-agnostic Explanations (LIME)?</h2>
+    <p>LIME is a technique for interpreting individual predictions of any "black-box" model. Instead of trying the explain the mdoel as a whole, LIME focuses on a singel instance: it generates small perturbations of that instance, observes the model's outputs, and then fits a simple, interpreatbl model (e.g., a linear regression or decision tree) to approximate the complex model's behavior in that local region.</p>
+
+    <p>By concentrating on a neighborhood around the target instance, LIME provides clear, human-readable explanations that tell you which features drove the model's prediction up or down for that particular case.</p>
+
+    <h2 class="mt-5">How Does It Work?</h2>
+    <p>Imagine you're in a new big city, and you only really need a detailed map of the few streets immediately surrounding your hotel. You draw a small map of just that area - highlighting the roads and landmarks you'll use today - rather than charting the entire metropolis. LIME works the same way: it "zooms in" on one data point's vicinity, samples nearby points, and builds a simple map of how features affect the prediction there.</p>
+
+    <p>
+    Formally, LIME finds an explanation model \(g\) by solving:
+    </p>
+    <p class="text-center">
+      \[
+      \underset{g \in G}{\arg\min}\; \mathcal{L}\bigl(f, g, \pi_x\bigr)\;+\;\Omega(g)
+      \]
+    </p>
+
+    <ul>
+      <li>\(f\): The original complex model</li>
+      <li>\( G \): The family of interpretable models (e.g., linear models)</li>
+      <li>\( \pi_x \): A proximity measure that weights samples by their closeness to the instance \(x\)</li>
+      <li>\(\mathcal{L}(f, g, \pi_x)\): Quantifies how well \(g\) approximates \(f\) on the perturbed samples</li>
+      <li>\(\Omega(g)\): A complexity penalty to keep \(g\) simple</li>
+    </ul>
+
+    <h3 class="mt-5">In Practice:</h3>
+    <ol>
+      <li>Select the instance of \(x\) to explain.</li>
+      <li>Generate perturbations around \(x\) by randomly sampling and tweaking its feature values.</li>
+      <li>Weight each perturbed sample by how similar it is to \(x\) (closer &rarr; higher weight).</li>
+      <li>Query the black-box model \(f\) on all perturbed samples to get predicted outputs.</li>
+      <li>Fit an interpretable model \(g\) (e.g., a sparse linear model) using the weighted dataset.</li>
+      <li>Present the explanation: coefficients of \(g\) indicate each feature's local contribution to \(f(x)\).</li>
+    </ol>
+
+    <p>Simple 🙂</p>
+    
+    <h2 class="mt-5">Strengths of LIME</h2>
+    <ul>
+      <li><strong>Model-agnostic</strong>: Works with any classifier or regressor</li>
+      <li><strong>Local fidelity</strong>: Provides high-quality explanations for individual predictions</li>
+      <li><strong>Flexibility</strong>: You choose the interpretable model and proximity kernel</li>
+      <li><strong>Versatility</strong>: Applicable to images, text, and tabular data</li>
+    </ul>
+
+    <h2 class="mt-5">When to use LIME</h2>
+    <p>LIME can be a useful go-to when:</p>
+    <ul>
+        <li>You're debugging: You can use LIME to diagnose why a model made a surprising prediction on a specific example.</li>
+        <li>You want to build trust: Use this method to show stakeholders exactly which features influenced a given decision.</li>
+        <li>You're conducting fairness audits: LIME allows you to investigate potential biases at the individual level.</li>
+        <li>You're looking for domain insights: This can help you understand specific drivers in sensitive applications (e.g., healthcare, finance)</li>
+    </ul>
+    <p>LIME is a fantastic exploration tool when you really want to drill down on a specific prediction. LIME is also a great tool for building trust with human evaluators - if you can give people a reasonable explanation for <em>why</em> a model chooses a prediction, they are more likely to trust the model's predictions overall</p>
+
+    <h2 class="mt-5">Limitations</h2>
+    <p>Like any tool, LIME is not always perfect for every use. Sometimes random perturbations can yield varying results, creating instability. Like any situation where the researcher has the ability to manipulate many variables, LIME is subject to parameter sensitivity: the choice of kernel width, number of samples, and interpretable model can all affect results. And despite relatively high computational costs, LIME only gives us insight to one point at a time (no global or overall view). The things that make it excellent for a deep dive in a narrow well also make it a less optimal choice in some situations.</p>
+
+    <h2 class="mt-5">Final Thoughts</h2>
+    <p>LIME bridges the gap between global tools like PDPs and local tools like ICE by offering interpretable, instance-level explanations that are model-agnostic. While it doesn't replace a thorough global audit, it's invaluable when you need to peel back the layers on a black box, one prediction at a time.</p>
+  <div class="container">
+    <a href="resources.html" class="btn btn-outline-secondary mb-4">&larr; References</a>
+   </div>
+  </div>
+</body>
+</html>
