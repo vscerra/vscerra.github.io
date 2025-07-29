@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demystifying Model Interpretability: Counterfactual Explanations</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../styles.css">
+
+  <!-- MathJax for LaTeX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #2c2c2c;
+      font-family: 'Open Sans', sans-serif;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      font-family: 'Playfair Display', serif;
+    }
+    .highlight {
+      color: #8e5e3b;
+      font-weight: 600;
+    }
+    .definition-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    .definition-table th, .definition-table td {
+      border: 1px solid #ccc;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    .definition-table th {
+      background-color: #eee;
+    }
+    code {
+      background-color: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+      <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="interpretability_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Interpretability</a>
+
+    <h1 class="fw-bold mb-4">Demystifying Model Interpretability: A Deep Dive Into Counterfactual Explanations</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p>I think that when I say I have a PhD in neuroscience, it conjures up in peoples’ minds images of white labcoats, pipettes, and cell cultures. That’s not unreasonable - many neuroscientists do that kind of bench work and our world is better for it. In reality, my days as a neuroscientist consisted of a few hours desperately watching an oscilloscope, and many hours cleaning, analyzing, and interpreting data, then building models to explain that data. And if all I had to do to be successful in neuroscience was that, I would probably still be there, because I loved those hours in front of my computer with my data. This brief jaunt down memory lane is actually relevant - what I’m writing about today are <strong>counterfactual explanations</strong>. In essence, my work in neuroscience can be distilled down to an exploration of a counterfactual. In basic terms, how this works is: we have a scenario wherein a certain phenomenon can be reliably produced, we create a scenario in which this known phenomenon does not hold true, and then we drill down on what specifically differs between our new scenario and the well-established one that can tell us something about the inner workings of a complex system, narrowing down the sources of unknown variance to as small a set as possible, so that we can draw meaningful conclusions from the outcomes. The complex system in my work was the primate frontal eye field, a small visomotor integrating region of the prefrontal cortex, but in a broader sense, this could be any black-box model.</p>
+    <h2 class="mt-5">TL; DR</h2>
+    <table class="definition-table">
+      <tr>
+        <th colspan="2" class="text-center">Counterfactual Explanations</th>
+      </tr>
+      <tr>
+        <td><strong>What:</strong></td>
+        <td>Show minimal changes to input features that would alter the model’s prediction</td>
+      </tr>
+      <tr>
+        <td><strong>Use When:</strong></td>
+        <td>You want user recourse, fairness insights, or actionable explanations</td>
+      </tr>
+      <tr>
+        <td><strong>Assumptions:</strong></td>
+        <td>You must define plausible alternatives and realistic constraints (the alternatives must exist in the real world)</td>
+      </tr>
+      <tr>
+        <td><strong>Alternatives:</strong></td>
+        <td>SHAP, ICE, LIME, contrastive explanations</td>
+      </tr>
+    </table>
+
+    <h2 class="mt-5">What Are Counterfactual Explanations?</h2>
+    <p>
+     Counterfactual explanations are a remarkably versatile and accessible explainability tool because they are built around outcomes, and do not require any deep understanding of the inner workings of the models producing those outcomes. It almost seems like a throwaway statement to say that you don’t need to understand the inner working of complex models to use counterfactuals, but it’s actually amazing - it means you don’t need to know anything about proprietary models and their design, it means that you don’t have to understand anything about machine learning to find them useful (anyone can understand them), and they can give interested parties actionable targets for changing/varying to obtain different outcomes. <strong>What counterfactual explanations do is search the input space for the nearest possible alternate inputs that generate a different output</strong>. </p>
+     <p>Let’s say you're using a classifier model to determine peoples’ eligibility for a new drug trial, and someone is classified as a 0, or ineligible.<strong> A counterfactual exploration would be able to tell you what that candidate might change, or do differently, to be classified differently.</strong> This can give interested parties a genuine understanding of the model’s decisions without having to know or understand anything going on under the hood. Similarly, these explanations can be used to assess fairness and bias in models. For example, if a counterfactual analysis of a model leads to the recommendation that candidates can get better outcomes by changing their race, or economic status, it might mean that the model is racially or economically biased, which, depending on the usage, could be a problem. </p>
+     <p>While other interpretability metrics can tell you <em>how</em> a decision was reached, counterfactuals let us explore <em>what might have been…</em>
+</p>
+
+    <h2 class="mt-5">How Do They Work?</h2>
+    <p>Imagine you have a dial for each of your model input features, and you want to turn as few dials as possible, just enough to cross the model’s decision boundary. An ideal counterfactual would turn those dials (alter the input features) as little as possible to obtain a new decision - representing the closest world in which things are “different”. Often, you have the choice of different “alternate worlds”, wherein different features are changed. This is a good thing, as it can illuminate various paths for targeting changes. You have to be sensible to two things: 1) how you compute the “distance” between your base feature value, and 2) that the new counterfactual features values could actually exist (e.g., age can’t be negative), ensuring realistic alternatives. Several libraries exist for aiding in this process, for example, DiCE Python library will generate diverse feasible counterfactual options to test in your model, and the Alibi library can test out different algorithms and distance metrics to obtain optimal results
+
+    </p>
+    <p>Simple 🙂</p>
+    
+    <h2 class="mt-5">Strengths: Why Use Counterfactuals?</h2>
+    <ul>
+      <li><strong>Actionability</strong>: Determining feasible counterfactuals can provide individuals with paths to better outcomes - which can be especially helpful in health, finance, hiring, etc. </li>
+      <li><strong>Fairness</strong>: You can use a counterfactual analysis to determine if some groups must make greater changes than others to receive the same outcomes, revealing some bias in the model.</li>
+      <li><strong>Debugging</strong>: Counterfactuals can help you determine if you have overly sharp decision boundaries or too rigid a model. </li>
+      <li><strong>Transparency</strong>: While most agree that models used to make decisions should be “transparent”, it is hard to agree on what that means. Counterfactuals provide a path to transparency that can be understood the technically naive as well as the technically proficient.
+</li>
+    </ul>
+
+    <h2 class="mt-5">Limitations</h2>
+    <ul>
+      <li><strong>Feasibility</strong>: Not all changes are realistic, even if potentially possible. This is why it can be important to have several options for counterfactual scenarios. </li>
+      <li><strong>Causal Blindness</strong>: Counterfactuals don’t imply causality unless explicitly modeled, they simply provide alternate scenarios in which the model’s output would be different.</li>
+      <li><strong>Multiplicity</strong>: Many valid counterfactuals can exist - choosing among them requires care and situational understanding and context. </li>
+      <li><strong>Over-optimization</strong>: You might just end up gaming the model, rather than revealing real-world paths. This is not so much a limitation, as something you must be aware of when using counterfactuals.</li>
+    </ul>
+    <h2 class="mt-5">Final Thoughts</h2>
+    <p>If PDP shows us the forest, ICE gives us the trees, and SHAP tells us the path we’ve taken to get where we are, counterfactuals let us ask what would have happened if we had turned left instead of right. Counterfactual explanations don’t just describe, they suggest. They empower. They let users and stakeholders understand the model’s decision as dynamic rather than static - an invitation to change rather than a closed door. </p>
+    <p>Stay tuned for a hands-on notebook where we generate and interpret counterfactuals using the DiCE library. You’ll see how simple tweaks can unlock powerful stories about your model - and your data. Stay tuned!</p>
+  <div class="container">
+    <a href="resources.html" class="btn btn-outline-secondary mb-4">&larr; References</a>
+   </div>
+  </div>
+</body>
+</html>
