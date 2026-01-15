@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HIV/AIDS Epidemic Modeling in Cuba</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    table { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="disease_modeling_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Disease Modeling</a>
+  <div class="container">
+    <h1 class="display-5">HIV/AIDS Epidemic Modeling in Cuba: Quantifying Contact Tracing Impact</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">A compartmental epidemiological model analyzing HIV/AIDS transmission dynamics and contact tracing effectiveness in Cuba (1986-2000).</p>
+
+    <p>How do we measure the impact of public health interventions that were never <em>not</em> implemented? This project tackles that 
+        question by building a mathematical model of HIV/AIDS epidemic dynamics in Cuba, explicitly incorporating the country's aggressive 
+        contact tracing program. By fitting the model to 15 years of surveillance data, I quantified both the historical effectiveness of 
+        Cuba's program and projected the potential impact of enhanced interventions.</p>
+
+    <h2>Background and Motivation</h2>
+    <p>Cuba implemented one of the world's most comprehensive HIV/AIDS control programs starting in 1986, featuring mandatory testing for 
+        certain populations, extensive contact tracing, and universal free treatment. This created a unique natural experiment: could 
+        mathematical modeling retrospectively quantify intervention effectiveness and guide future policy?</p>
+    
+    <p>The data comes from De Arazoza & Lounes (2002), covering annual HIV cases, AIDS cases, and deaths from 1986-2000. The challenge was 
+        to build a model that could capture both disease biology (transmission, progression) and public health intervention (contact tracing) 
+        in a way that was computationally tractable yet policy-relevant.</p>
+
+    <h2>Model Structure</h2>
+    <p><strong>Compartmental Design.</strong> I developed a modified SEIR-type model with 5 compartments: Susceptible (S), HIV-positive untreated (H), 
+        HIV-positive treated (T), AIDS (A), and Deaths (D). The key innovation was splitting HIV-positive individuals into treated vs. untreated 
+        compartments, allowing explicit modeling of contact tracing as a transfer rate (τ) from H to T.</p>
+    
+    <p>The model captures three critical mechanisms:</p>
+    <ul>
+        <li><strong>Transmission:</strong> Only untreated HIV+ individuals (H) contribute to spread (frequency-dependent: β·S·H/N)</li>
+        <li><strong>Disease progression:</strong> Two rates capture treatment benefit: untreated progress faster to AIDS (α = 0.233/year) than 
+            treated (α<sub>T</sub> = 0.085/year)</li>
+        <li><strong>Contact tracing:</strong> Rate τ = 0.50/year represents identification and treatment initiation, achieving ~66% coverage</li>
+    </ul>
+
+    <p><strong>Why This Approach?</strong> Compartmental ODE models occupy a "sweet spot" for epidemic modeling: complex enough to capture 
+        key biological and intervention mechanisms, simple enough for robust parameter estimation from aggregate data, and fast enough for 
+        interactive exploration. Alternative approaches (agent-based models, statistical regression) would either require unavailable individual-level 
+        data or sacrifice mechanistic insight.</p>
+
+    <p><strong>Omission of "Exposed" (E) compartment.</strong> Classic SEIR models have "exposed" compartments for diseases like measles (10-14 day incubation), 
+      tuberculosis (weeks-months of latent infection), and even COVID-19 (2-5 day incubation). Unlike those diseases, however, HIV doesn't have a meaningful
+       non-infectious incubation period. HIV-infected individuals become infectious almost immediately after infection, even before they develop 
+       symptoms or test positive. Adding an E compartment would increase model complexity and require data on acute vs. chronic transmission rates (not 
+       available in the dataset I used), and the annual resolution of this model wouldn't capture week-scale dynamics. The cost-benefit verdict in this 
+       case is that it wouldn't be worth the additional model complexity to answer the general policy question of contact tracing effectiveness over years.</p>
+
+    <h2>Parameter Estimation</h2>
+    <p><strong>Optimization Challenge.</strong> Estimating 6 parameters (β, α, α<sub>T</sub>, τ, δ, μ) from epidemiological data is non-trivial. 
+        The objective function—matching model predictions to observed HIV cases, AIDS cases, and deaths—involves solving a system of coupled ODEs 
+        at each evaluation, creating a highly non-linear, non-convex optimization landscape with multiple local minima.</p>
+    
+    <p><strong>Differential Evolution Solution.</strong> I used differential evolution, a population-based global optimizer that explores parameter 
+        space by evolving a population of candidate solutions through mutation, crossover, and greedy selection. Unlike gradient-based methods, it 
+        doesn't require derivatives (which would necessitate expensive adjoint equations) and is robust to local minima. The algorithm ran for 300 
+        generations with a population of 90 individuals (~27,000 ODE solves), completing in 2-3 minutes on standard hardware.</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Interpretation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>β</strong></td><td>0.932</td><td>Transmission rate (per year)</td></tr>
+        <tr><td><strong>α</strong></td><td>0.235</td><td>HIV→AIDS progression, untreated (mean: 4.3 years)</td></tr>
+        <tr><td><strong>α<sub>T</sub></strong></td><td>0.085</td><td>HIV→AIDS progression, treated (mean: 11.8 years)</td></tr>
+        <tr><td><strong>τ</strong></td><td>0.500</td><td>Contact tracing rate (66% coverage -> probability traced before AIDS: τ/(τ+α+μ) )</td></tr>
+        <tr><td><strong>δ</strong></td><td>0.132</td><td>AIDS mortality rate (mean survival: 7.6 years)</td></tr>
+        <tr><td><strong>μ</strong></td><td>0.020</td><td>Natural birth/death rate</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Key Epidemiological Insight:</strong> The fitted basic reproduction number R₀ = 1.24 indicates slow but sustained epidemic growth—close 
+        enough to 1 that enhanced interventions could realistically push it below the epidemic threshold. Treatment extends healthy life by 2.7×, and 
+        Cuba's contact tracing achieved 66% coverage, far exceeding most countries during this era.</p>
+
+    <h2>Model Validation</h2>
+    <p>The model achieved excellent fit to all three data streams:</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Outcome</th><th>R² Value</th><th>Assessment</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>HIV cases</td><td>0.871</td><td>87.1% of variance explained</td></tr>
+        <tr><td>AIDS cases</td><td>0.948</td><td>94.8% of variance explained</td></tr>
+        <tr><td>Deaths</td><td>0.929</td><td>92.9% of variance explained</td></tr>
+      </tbody>
+    </table>
+
+    <p>Visual inspection confirmed the model captures both long-term trends (increasing cases) and relative timing (AIDS lags behind HIV, deaths 
+        lag behind AIDS). The fitted compartment dynamics reveal an interesting phenomenon: the treated (T) compartment grows fastest, eventually 
+        exceeding all other disease states. This isn't a model artifact—it reflects the real-world impact of successful treatment programs that 
+        convert HIV from a rapidly fatal disease into a chronic manageable condition.</p>
+
+    <h2>Intervention Analysis</h2>
+    <p><strong>Scenario Design.</strong> I projected epidemic trajectories under four contact tracing intensities starting in 1997: baseline (continue 
+        existing program), moderate (2× enhancement), strong (4× enhancement), and very strong (6× enhancement). The analysis quantifies both absolute 
+        impact (cases averted) and relative effectiveness (percent reduction).</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Intervention</th><th>AIDS Cases Averted by 2010</th><th>Deaths Averted</th><th>% Reduction</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Moderate (2×)</strong></td><td>~7210</td><td>~3595</td><td>89.3%</td></tr>
+        <tr><td><strong>Strong (4×)</strong></td><td>~7541</td><td>~4032</td><td>93.4%</td></tr>
+        <tr><td><strong>Very Strong (6×)</strong></td><td>~7583</td><td>~4109</td><td>93.9%</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Diminishing Returns.</strong> While all scenarios show substantial benefit, returns diminish with intensity. Doubling contact tracing 
+        (2×) averts 7210 AIDS cases; doubling again (4×) adds only 331 more cases averted. This suggests an optimal balance around 3-4× baseline capacity, 
+        where impact remains high without hitting logistical constraints.</p>
+
+    <p><strong>Practical Feasibility.</strong> The moderate scenario (2× tracing) is highly feasible with modest investment—approximately $10-20M/year 
+        for a population of 11 million, yielding a cost per life-year saved of ~$25-35K, which is highly cost-effective by WHO standards. The strong 
+        scenario (4×) is achievable but requires major investment and multi-year ramp-up. The very strong scenario (6×) likely hits practical ceilings 
+        around staffing, infrastructure, and the hardest-to-reach populations.</p>
+
+    <h2>Key Insights</h2>
+    <p>This analysis demonstrates that <strong>mathematical modeling can quantify intervention effectiveness even for programs that were never absent</strong>. 
+        Key findings:</p>
+    <ul>
+        <li><strong>Contact tracing substantially altered epidemic trajectory.</strong> Without Cuba's program, the model projects ~50% more AIDS cases by 2000.</li>
+        <li><strong>Enhanced interventions show clear dose-response.</strong> Each level of intensification produces measurable benefit, though with diminishing returns.</li>
+        <li><strong>Treatment creates accumulation dynamics.</strong> The growing treated population isn't a problem—it's evidence of success, representing people 
+            living long, healthy lives who would otherwise have died.</li>
+        <li><strong>Modeling informs policy prioritization.</strong> The 3-4× enhancement range likely optimizes impact-to-effort ratio, suggesting where to target 
+            limited resources.</li>
+    </ul>
+
+    <p><strong>Methodological Decisions and Reasoning</strong></p>
+    <ul>
+        <li><strong>Compartmental over agent-based.</strong> Population-level aggregation matches available data and enables tractable optimization. Individual 
+            heterogeneity could be added in future work but wasn't necessary for policy-relevant insights.</li>
+        <li><strong>Differential evolution for optimization.</strong> Gradient-free global search was essential given non-convex objective landscape. Alternative 
+            approaches (Nelder-Mead, simulated annealing) would likely trap in local minima or converge more slowly.</li>
+        <li><strong>Explicit contact tracing parameter.</strong> Rather than lumping intervention into overall transmission reduction, modeling τ separately allows 
+            direct quantification of program effectiveness and scenario testing.</li>
+        <li><strong>Fit to new cases, not cumulative.</strong> Annual incidence is more informative than cumulative totals and tests the model's ability to capture 
+            temporal dynamics, not just monotonic growth.</li>
+        <li><strong>Modular code architecture.</strong> Separating model equations, optimization, and analysis into reusable modules enables extension to other 
+            diseases, populations, or interventions.</li>
+    </ul>
+
+    <h2>Limitations and Future Directions</h2>
+    <p><strong>Current Limitations.</strong> The model assumes homogeneous mixing (no risk groups, networks, or geographic structure), constant parameters over 
+        time (ignoring behavioral changes and treatment improvements post-1996), and perfect adherence once treated. No uncertainty quantification means we have 
+        point estimates without confidence intervals.</p>
+
+    <p><strong>When This Model Is/Isn't Appropriate.</strong> This approach excels at population-level policy planning, medium-term projections (5-15 years), 
+        and comparative scenario analysis. It's inappropriate for individual-level predictions, short-term outbreak response requiring stochasticity, or situations 
+        demanding detailed population stratification.</p>
+
+    <p><strong>Extensions Worth Pursuing.</strong> Priority improvements include Bayesian inference for uncertainty quantification, stratification by risk group 
+        (MSM, heterosexual, IDU), time-varying parameters to capture HAART introduction, and cost-effectiveness analysis integrating economic data. The modular 
+        codebase makes these additions straightforward.</p>
+
+    <h2>Broader Context</h2>
+    <p>This work sits within a 40-year tradition of HIV/AIDS modeling, from early SIR models in the 1980s through treatment-era models in the 1990s to modern 
+        combination prevention frameworks. The contribution here is demonstrating how established methodology can be applied to unique datasets (Cuba's program) 
+        to answer policy-relevant questions (intervention effectiveness) using modern computational tools (differential evolution, modular Python).</p>
+
+    <p>The project validates that compartmental models remain valuable despite growing interest in agent-based and machine learning approaches. When the question 
+        is "how effective is this intervention?" rather than "what will happen to this individual?", mechanistic population models provide interpretable, 
+        policy-actionable insights that more complex approaches often obscure.</p>
+
+    <p class="mt-5">
+        <a href="https://github.com/vscerra/disease_modeling_project/blob/main/notebooks/Cuban_HIV_AIDS_model.ipynb" class="btn btn-primary">Source Code</a>
+    </p>
+  </div>
+</body>
+</html>
