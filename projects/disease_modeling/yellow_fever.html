@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yellow Fever Outbreak Modeling: Senegal 2002</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    table { margin-top: 2rem; }
+    .code-block { background-color: #f8f9fa; padding: 1rem; border-left: 4px solid #0d6efd; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="epi_index.html" class="btn btn-outline-secondary mb-4">&larr; Back to Epidemiology</a>
+  <div class="container">
+    <h1 class="display-5">Yellow Fever Outbreak Modeling: Senegal 2002</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">Compartmental disease modeling with vaccination intervention to quantify public health impact and assess endemic potential.</p>
+
+    <p>Coming off my <a href="cuba.html">HIV/AIDS modeling project for Cuba</a>, I wanted to tackle a different type of epidemic challenge—one with 
+        a rapid outbreak timeline, limited data, and a clear intervention point. Yellow fever provided exactly that opportunity. Unlike HIV's slow 
+        burn over decades, yellow fever outbreaks explode quickly and can be controlled through vaccination. The 2002 outbreak in Touba, Senegal 
+        offered a perfect case study: a discrete epidemic with WHO surveillance data and a documented vaccination response starting October 1st.</p>
+
+    <h2>Dataset and Context</h2>
+    <p>The WHO reported a yellow fever outbreak in Touba, Senegal (population ~800,000) beginning in October 2002. The city identified cases on 
+        October 11th and had already initiated a mass vaccination campaign on October 1st following early detection. The available data consisted of 
+        just 8 time points spanning January through November 2002, documenting cumulative cases and deaths.</p>
+    
+    <p>Working with only 8 observations might seem limiting, but this reflects the reality of outbreak response—you make decisions with incomplete 
+        information. The challenge was to build a model that could extract meaningful insights from sparse data while remaining scientifically rigorous.</p>
+
+    <h3>Data Quality Challenge</h3>
+    <p>An early obstacle emerged when examining the temporal structure: the January 18th observation showed 18 cumulative cases, but by October 4th, 
+        only 12 cases were reported. <strong>Cumulative counts can't decrease</strong>—this violated a fundamental constraint of epidemic data. After 
+        investigating, I determined the January observation was likely either from background surveillance or misattributed, not part of the October-November 
+        outbreak cluster. I removed this data point to maintain monotonicity, leaving 7 observations from the actual outbreak period.</p>
+
+    <div class="code-block">
+        <strong>Key Decision:</strong> Data filtering based on epidemiological principles
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+            <li>Removed non-monotonic observation (Jan 18)</li>
+            <li>Verified remaining data showed proper cumulative growth</li>
+            <li>Reset time origin to outbreak detection (Oct 4, 2002)</li>
+        </ul>
+    </div>
+
+    <h2>Model Architecture: SEIR with Vaccination</h2>
+    <p>I chose a compartmental SEIR model—a standard framework in infectious disease epidemiology—and extended it to include vaccination. The model 
+        divides the population into six compartments:</p>
+    
+    <ul>
+        <li><strong>S (Susceptible):</strong> Individuals at risk of infection</li>
+        <li><strong>E (Exposed):</strong> Infected but not yet infectious (incubation period)</li>
+        <li><strong>I (Infectious):</strong> Actively spreading disease</li>
+        <li><strong>R (Recovered):</strong> Natural immunity from infection</li>
+        <li><strong>V (Vaccinated):</strong> Vaccine-induced immunity</li>
+        <li><strong>D (Deaths):</strong> Disease-induced mortality</li>
+    </ul>
+
+    <p>The vaccination component was critical—it allowed me to model the intervention explicitly and assess its impact through counterfactual scenarios.</p>
+
+    <h3>Fixed vs. Fitted Parameters</h3>
+    <p>With only 7 data points, I couldn't estimate all parameters simultaneously without overfitting. I made a strategic decision to <strong>fix 
+        well-established parameters from medical literature</strong> and focus estimation on the uncertain ones:</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Source</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Incubation Period (1/σ)</td><td>6 days</td><td>WHO Guidelines, Monath & Vasconcelos (2015)</td><td><span class="badge bg-secondary">Fixed</span></td></tr>
+        <tr><td>Infectious Period (1/γ)</td><td>7 days</td><td>Clinical literature, Garske et al. (2014)</td><td><span class="badge bg-secondary">Fixed</span></td></tr>
+        <tr><td>Vaccine Efficacy</td><td>95%</td><td>WHO Position Paper (2013)</td><td><span class="badge bg-secondary">Fixed</span></td></tr>
+        <tr><td>Transmission Rate (β)</td><td>—</td><td>Estimated from data</td><td><span class="badge bg-primary">Fitted</span></td></tr>
+        <tr><td>Mortality Rate (α)</td><td>—</td><td>Estimated from data</td><td><span class="badge bg-primary">Fitted</span></td></tr>
+        <tr><td>Vaccination Rate</td><td>—</td><td>Estimated from data</td><td><span class="badge bg-primary">Fitted</span></td></tr>
+        <tr><td>Vaccination Start</td><td>—</td><td>Estimated from data</td><td><span class="badge bg-primary">Fitted</span></td></tr>
+      </tbody>
+    </table>
+
+    <p>This approach balanced data constraints with scientific rigor. The fixed parameters came from peer-reviewed clinical studies with narrow 
+        uncertainty ranges, while the fitted parameters represented outbreak-specific dynamics that varied by context.</p>
+
+    <h2>Optimization Method: Maximum Likelihood Estimation</h2>
+    <p>For parameter estimation, I chose <strong>Maximum Likelihood Estimation (MLE)</strong> with a Poisson likelihood function. This wasn't an 
+        arbitrary choice—it was driven by the nature of the data:</p>
+
+    <h3>Why MLE with Poisson?</h3>
+    <ul>
+        <li><strong>Count data:</strong> Cases and deaths are discrete counts, not continuous measurements</li>
+        <li><strong>Statistical foundation:</strong> Poisson distribution is standard for rare event counts in epidemiology</li>
+        <li><strong>Small sample performance:</strong> MLE is known to perform well even with limited data</li>
+        <li><strong>Principled framework:</strong> Provides model comparison tools (AIC, BIC) and asymptotic confidence intervals</li>
+    </ul>
+
+    <p>I implemented the likelihood function to incorporate both cases and deaths, ensuring the optimizer couldn't ignore one data stream in favor 
+        of the other. Each observation contributed to the total log-likelihood through its Poisson probability.</p>
+
+    <div class="code-block">
+        <strong>Alternatives Considered:</strong>
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+            <li><strong>Least Squares:</strong> Simpler but inappropriate for count data (assumes normal errors)</li>
+            <li><strong>Bayesian MCMC:</strong> Would provide full uncertainty but too computationally expensive for this exploratory analysis</li>
+            <li><strong>Profile Likelihood:</strong> Excellent for confidence intervals but requires many model runs</li>
+        </ul>
+    </div>
+
+    <h3>Optimization Challenges: The Alpha Problem</h3>
+    <p>During initial fitting attempts, I encountered a frustrating issue: the mortality parameter (α) kept converging to zero, predicting no deaths 
+        despite 11 observed deaths. The optimizer had found a local minimum where it could fit cases reasonably while completely ignoring mortality.</p>
+
+    <p>The root cause was simple but critical: <strong>the lower bound on α was set to 0.0</strong>, allowing the optimizer to "escape" the death 
+        predictions entirely. The fix required adjusting the parameter bounds to prevent this numerical instability:</p>
+
+    <div class="code-block">
+        <strong>Solution:</strong> Changed mortality bounds from [0.0, 0.3] to [0.005, 0.3]
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+            <li>Justification: Observed case fatality rate (CFR) was 18.3% (11 deaths / 60 cases)</li>
+            <li>Over 7-day infectious period: α ≈ 0.183/7 ≈ 0.026</li>
+            <li>Minimum 0.005 prevents numerical issues while allowing model flexibility</li>
+        </ul>
+    </div>
+
+    <p>This debugging process highlighted the importance of understanding optimizer behavior—good bounds aren't just about biological plausibility, 
+        they're about guiding the optimization to meaningful solutions.</p>
+
+    <h2>Results and Model Performance</h2>
+    <p>After resolving the optimization issues, the model converged successfully with excellent fit quality:</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Metric</th><th>Cases</th><th>Deaths</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>R² (Coefficient of Determination)</td><td>0.93</td><td>0.96</td></tr>
+        <tr><td>RMSE (Root Mean Squared Error)</td><td>5.0</td><td>.80</td></tr>
+        <tr><td>MAE (Mean Absolute Error)</td><td>4.3</td><td>.64</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Fitted Parameters</h3>
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Parameter</th><th>Estimate</th><th>Interpretation</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Transmission Rate (β)</td><td>0.206</td><td>Rate of new infections per contact</td></tr>
+        <tr><td>Mortality Rate (α)</td><td>0.033</td><td>Daily probability of death while infectious</td></tr>
+        <tr><td>Vaccination Rate</td><td>0.009</td><td>~0.9% of susceptibles vaccinated daily</td></tr>
+        <tr><td>R₀ (Basic Reproduction Number)</td><td>1.17</td><td>Each case infects ~1.17 others (epidemic potential)</td></tr>
+      </tbody>
+    </table>
+
+    <p>The R₀ value of 1.17 was particularly important—being greater than 1 confirmed the outbreak had epidemic potential and would continue to 
+        grow without intervention. This validated the urgency of the vaccination campaign.</p>
+
+    <h2>Counterfactual Analysis: Vaccination Impact</h2>
+    <p>To quantify the vaccination program's effectiveness, I ran three scenarios using the fitted model:</p>
+
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Scenario</th><th>Total Cases</th><th>Total Deaths</th><th>Peak Infections</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Baseline (With Vaccination)</strong></td><td>62</td><td>10</td><td>10</td></tr>
+        <tr><td>No Vaccination</td><td>97</td><td>14</td><td>11</td></tr>
+        <tr><td>Early Vaccination (2 weeks earlier)</td><td>62</td><td>10</td><td>10</td></tr>
+        <tr><td>Later Vaccination (1 week later)</td><td>70</td><td>11</td><td>10</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Vaccination Impact:</strong> The program averted approximately <strong>35 cases (35%)</strong> and <strong>4 deaths (29%)</strong> 
+        compared to the no-intervention scenario. This represents significant public health benefit from rapid response.</p>
+
+    <p>Interestingly, vaccinating two weeks earlier produced identical outcomes to the baseline. This suggests the October 1st start date was 
+        already "early enough"—the outbreak was still in its early exponential phase, so the actual timing captured most of the preventable 
+        transmission. Starting even earlier wouldn't have helped because there wasn't yet substantial community transmission to prevent. Delaying 
+        vaccination rollout by even 1 week, however could have resulted in an additional 8 cases and caused an additional death.</p>
+
+    <h2>Sensitivity Analysis: Robustness Check</h2>
+    <p>Since I fixed the incubation and infectious periods based on literature, I needed to verify that my conclusions were robust to these choices. 
+        I re-ran the analysis across 16 parameter combinations spanning the full literature-supported ranges:</p>
+
+    <ul>
+        <li><strong>Incubation period:</strong> 3-6 days (literature range)</li>
+        <li><strong>Infectious period:</strong> 4-7 days (literature range)</li>
+    </ul>
+
+    <p><strong>Key Finding:</strong> R₀ remained above 1.0 for <em>all</em> parameter combinations tested, with a coefficient of variation of 
+        only 8%. This confirmed that the epidemic conclusion—that yellow fever had outbreak potential requiring intervention—was robust to 
+        uncertainty in the fixed parameters.</p>
+
+    <h2>Key Insights and Methodological Decisions</h2>
+    <p><strong>Scientific Rigor with Limited Data</strong></p>
+    <ul>
+        <li><strong>Literature-based constraints.</strong> Rather than trying to estimate everything from 7 data points, I anchored uncertain 
+            parameters to peer-reviewed clinical studies. This prevented overfitting while maintaining flexibility where it mattered most.</li>
+        <li><strong>Sensitivity analysis validates choices.</strong> By testing across parameter ranges, I demonstrated that conclusions were 
+            stable—not artifacts of specific parameter selections.</li>
+        <li><strong>Monotonicity checking.</strong> Verifying cumulative data never decreased caught a critical data quality issue early. Always 
+            validate that data conforms to domain constraints.</li>
+    </ul>
+
+    <p><strong>Optimization and Debugging</strong></p>
+    <ul>
+        <li><strong>Appropriate bounds matter.</strong> The α=0 issue taught me that parameter bounds need to prevent numerical edge cases, not 
+            just enforce biological plausibility.</li>
+        <li><strong>MLE over least squares for counts.</strong> Choosing the statistically appropriate method for the data type (counts → Poisson) 
+            led to better convergence and more interpretable results.</li>
+        <li><strong>Diagnostic tools are essential.</strong> Building in simulation checks and fit diagnostics helped identify when the optimizer 
+            was producing nonsensical results.</li>
+    </ul>
+
+    <p><strong>Practical Public Health Insights</strong></p>
+    <ul>
+        <li><strong>Rapid response is critical.</strong> The vaccination program, despite starting just days before official outbreak detection, 
+            prevented significant morbidity and mortality.</li>
+        <li><strong>Timing flexibility matters.</strong> The fact that "early" vaccination wasn't better than baseline suggests response speed 
+            within a reasonable window (days, not weeks) is what matters most.</li>
+        <li><strong>Quantifying intervention impact builds the case for preparedness.</strong> Being able to say "vaccination prevented 37 cases" 
+            provides concrete evidence for maintaining vaccine stockpiles and rapid response capacity.</li>
+    </ul>
+
+    <h2>What I Learned</h2>
+    <p>This project reinforced that <strong>epidemic modeling is as much about careful decision-making as sophisticated mathematics</strong>. 
+        Every choice—from which parameters to fix, to how to handle outlier data points, to which optimization bounds to set—required balancing 
+        statistical principles, domain knowledge, and practical constraints.</p>
+
+    <p>Working with sparse data forced me to be deliberate about uncertainty. Rather than treating 7 data points as a limitation, I treated it 
+        as a constraint that required smarter modeling choices. The result was a model that was simultaneously simple enough to be interpretable, 
+        complex enough to capture key dynamics, and robust enough to trust for policy insights.</p>
+
+    <p>Most importantly, this project demonstrated how mathematical models can bridge the gap between observational data and actionable public 
+        health decisions—quantifying not just what happened, but what <em>would have happened</em> under different scenarios.</p>
+
+    <p class="mt-5">
+        <a href="https://github.com/vscerra/disease_modeling_project/blob/main/notebooks/Senegal_Yellow_Fever_model.ipynb" class="btn btn-primary me-2">View Source Code</a>
+        
+    </p>
+  </div>
+</body>
+</html>
