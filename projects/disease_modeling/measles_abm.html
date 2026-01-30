@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent-Based Modeling: Measles Transmission in Schools</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    table { margin-top: 2rem; }
+    .code-block { background-color: #f8f9fa; padding: 1rem; border-left: 4px solid #0d6efd; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="disease_modeling.html" class="btn btn-outline-secondary mb-4">&larr; Back to Disease Modeling</a>
+  <div class="container">
+    <h1 class="display-5">Agent-Based Modeling: Measles Transmission in Schools</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">Moving beyond population-level compartmental models to capture spatial structure, contact networks, and vaccination clustering effects in disease dynamics.</p>
+
+    <p>After building compartmental (ODE) models for <a href="cuba.html">HIV/AIDS in Cuba</a> and <a href="yellow_fever.html">yellow fever in Senegal</a>, 
+        I wanted to tackle a fundamentally different type of modeling challenge - one where individual heterogeneity and spatial structure aren't just 
+        details to abstract away, but critical drivers of epidemic dynamics. School-based measles outbreaks provided the perfect case study. When 
+        unvaccinated students cluster in specific classrooms, when contact networks are structured by grade level, and when stochastic fadeout can 
+        determine whether an outbreak explodes or fizzles - these are precisely the phenomena where agent-based models (ABMs) excel.</p>
+
+    <h2>Why Agent-Based Modeling?</h2>
+    <p>Compartmental models treat populations as well-mixed pools - everyone in the "Susceptible" compartment has equal probability of contacting 
+        anyone in the "Infectious" compartment. This works remarkably well for large, homogeneous populations with random mixing. But schools aren't 
+        like that. A third-grader in Classroom A spends most of their day with 24 specific classmates, not randomly sampling from 450 students. 
+        Vaccination rates can vary from 100% in one classroom to 60% in another due to clustered beliefs or access barriers. One infected student 
+        doesn't equally expose the entire school - they expose their immediate social network.</p>
+
+    <p><strong>What ABM Captures That ODEs Can't:</strong></p>
+    <ul>
+        <li><strong>Network structure:</strong> Explicit contact patterns (within-classroom, between-classroom, across grades)</li>
+        <li><strong>Spatial clustering:</strong> Disease spreads through connected clusters, creating visible spatial patterns</li>
+        <li><strong>Individual heterogeneity:</strong> Each student has unique vaccination status, classroom, infection timing</li>
+        <li><strong>Stochastic dynamics:</strong> Small outbreaks can randomly fade out even when R₀ > 1</li>
+        <li><strong>Targeted interventions:</strong> Close specific classrooms, ring vaccination around cases, trace contacts</li>
+    </ul>
+
+    <p>This isn't to say ABMs are "better" - they're computationally expensive, harder to fit to data, and can obscure big-picture trends in 
+        individual-level noise. But for structured populations with heterogeneous mixing, they reveal dynamics that population models miss entirely.</p>
+
+    <h2>Model Design and Architecture</h2>
+    
+    <h3>School Structure</h3>
+    <p>I modeled a realistic elementary school with 6 grades (1-6), 3 parallel classrooms per grade, and 25 students per classroom (450 students 
+        total). This isn't arbitrary: it matches typical U.S. elementary school sizes and creates enough structure to show spatial effects without 
+        becoming computationally prohibitive.</p>
+
+    <p>Each student is an individual agent with:</p>
+    <ul>
+        <li><strong>Fixed attributes:</strong> Student ID, grade, classroom assignment</li>
+        <li><strong>Vaccination status:</strong> Whether vaccinated, whether protected (accounting for 97% efficacy)</li>
+        <li><strong>Disease state:</strong> Susceptible, Exposed, Infectious, or Recovered (SEIR framework)</li>
+        <li><strong>Temporal tracking:</strong> Time in current state, infection day, progression history</li>
+    </ul>
+
+    <div class="code-block">
+        <strong>Key Design Decision:</strong> Individual-level tracking with classroom structure
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+            <li>Each student is a Python object with explicit state and attributes</li>
+            <li>Students organized hierarchically: School → Grade → Classroom → Individual</li>
+            <li>Contact networks defined by classroom membership and spatial proximity</li>
+            <li>Enables visualization of spatial spread patterns</li>
+        </ul>
+    </div>
+
+    <h3>Contact Networks and Transmission</h3>
+    <p>The core of any ABM is the contact structure. I implemented a two-tier contact system:</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Contact Type</th><th>Daily Contacts</th><th>Transmission Probability</th><th>Rationale</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+            <td><strong>Within-Classroom</strong></td>
+            <td>~20</td>
+            <td>β = 0.08</td>
+            <td>Close, prolonged contact with same classmates</td>
+        </tr>
+        <tr>
+            <td><strong>Between-Classroom</strong></td>
+            <td>~5</td>
+            <td>β = 0.005</td>
+            <td>Hallway, playground, lunchroom mixing</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Why These Values?</strong> Within-classroom transmission is 16× stronger than between-classroom because students spend 6-7 hours/day 
+        in close quarters with classmates but only brief periods (recess, lunch, transitions) mixing with other grades. The contact counts come 
+        from social network studies in schools (Stehlé et al., 2011; Read et al., 2008), and transmission probabilities were calibrated to produce 
+        realistic R₀ values (~12-15 for measles in susceptible populations).</p>
+
+    <div class="code-block">
+        <strong>Implementation Detail:</strong> Stochastic Contact Generation
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+            <li>For each infectious student, sample N<sub>within</sub> ~ Poisson(20) classmate contacts</li>
+            <li>Sample N<sub>between</sub> ~ Poisson(5) contacts from other classrooms/grades</li>
+            <li>Each contact has probability β of transmission if susceptible</li>
+            <li>Newly exposed students enter latent period before becoming infectious</li>
+        </ul>
+    </div>
+
+    <h3>Disease Progression Dynamics</h3>
+    <p>Measles follows classic SEIR dynamics with well-characterized parameters:</p>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Meaning</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+            <td><strong>Latent Period (1/σ)</strong></td>
+            <td>10 days</td>
+            <td>Time from infection to becoming infectious</td>
+            <td>Guerra et al. (2017)</td>
+        </tr>
+        <tr>
+            <td><strong>Infectious Period (1/γ)</strong></td>
+            <td>8 days</td>
+            <td>Duration of infectiousness</td>
+            <td>Clinical literature</td>
+        </tr>
+        <tr>
+            <td><strong>Basic R₀</strong></td>
+            <td>~13-16</td>
+            <td>Secondary infections per case</td>
+            <td>Combined from contact rates and β values</td>
+        </tr>
+        <tr>
+            <td><strong>Vaccine Efficacy</strong></td>
+            <td>97%</td>
+            <td>Protection with 2-dose MMR</td>
+            <td>CDC/WHO</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Progression through disease states uses stochastic transitions: at each time step (1 day), exposed individuals have probability 
+        1 - exp(-σ·dt) of becoming infectious, and infectious individuals have probability 1 - exp(-γ·dt) of recovering. This creates 
+        realistic, exponentially-distributed durations rather than fixed lockstep transitions.</p>
+
+    <h2>Vaccination Implementation and Clustering</h2>
+    <p>The most critical modeling decision was how to implement vaccination. Real-world vaccination coverage isn't uniformly distributed - it 
+        clusters. Communities with strong anti-vaccine sentiment, limited healthcare access, or religious exemptions create pockets of susceptibility.</p>
+
+    <h3>Two Vaccination Scenarios</h3>
+
+    <p><strong>1. Random Vaccination (Ideal Case):</strong> Select coverage % of students at random across the entire school. This represents 
+        perfect vaccine distribution (what you'd get if every family made independent, random vaccination decisions).</p>
+
+    <p><strong>2. Clustered Vaccination (Realistic Case):</strong> Vary coverage by classroom using a Beta distribution, creating heterogeneity 
+        where some classrooms have high coverage (95%+) and others have low coverage (60-70%). This models real-world patterns where vaccination 
+        attitudes cluster geographically or socially.</p>
+
+    <div class="code-block">
+        <strong>Clustering Implementation:</strong>
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+            <li>For each classroom, draw coverage from Beta(α, β) centered around target mean</li>
+            <li>Clustering factor controls variance: 0 = uniform, 1 = extreme clustering</li>
+            <li>Within each classroom, randomly select students to vaccinate at that coverage</li>
+            <li>Vaccinated students have 97% chance of protection (efficacy), placed in Recovered state</li>
+        </ul>
+    </div>
+
+    <h2>Results: Baseline and Vaccination Scenarios</h2>
+
+    <h3>Baseline: No Vaccination</h3>
+    <p>Starting with one infected student in Grade 3, a fully susceptible population shows measles' frightening contagiousness:</p>
+
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Metric</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Attack Rate</td><td>100% (all 449 susceptible students infected)</td></tr>
+        <tr><td>Peak Infectious</td><td>83 students (Day 77)</td></tr>
+        <tr><td>Epidemic Duration</td><td>~100 days</td></tr>
+      </tbody>
+    </table>
+
+    <p>The spatial visualizations reveal how disease spreads: starting in one Grade 3 classroom, it rapidly saturates that room, then spreads 
+        to adjacent classrooms via hallway/recess contacts, eventually reaching all grades. This creates visible "waves" of infection moving 
+        through the school structure.</p>
+
+    <h3>Vaccination Coverage Analysis</h3>
+    <p>I tested four coverage levels representing different public health scenarios:</p>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr><th>Scenario</th><th>Coverage</th><th>Attack Rate</th><th>Peak Infectious</th><th>Outbreak Contained?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>No Vaccination</td><td>0%</td><td>100.0%</td><td>83</td><td>❌</td></tr>
+        <tr><td>Low Coverage</td><td>70%</td><td>53.8%</td><td>12</td><td>❌</td></tr>
+        <tr><td>Medium Coverage</td><td>85%</td><td>30.0%</td><td>6</td><td>❌</td></tr>
+        <tr><td>High Coverage</td><td>95%</td><td>2.9%</td><td>2</td><td>✅</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Key Finding: The ~93-95% Threshold.</strong> Attack rates drop dramatically above 93% coverage, consistent with theoretical herd 
+        immunity threshold HIT = 1 - 1/R₀ ≈ 93% for R₀=15. Below this threshold, outbreaks still occur but with reduced severity. Above it, 
+        most introductions self-limit before spreading widely.</p>
+
+    <h3>The Clustering Effect</h3>
+    <p>At identical overall coverage (85%), clustering makes a massive difference:</p>
+
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Vaccination Pattern</th><th>Attack Rate</th><th>Peak Infectious</th><th>Difference</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Random (85%)</td><td>30.0%</td><td>6</td><td>Baseline</td></tr>
+        <tr><td>Clustered (85%)</td><td>42.3%</td><td>9</td><td>+41% more cases</td></tr>
+      </tbody>
+    </table>
+
+    <p>When unvaccinated students cluster in specific classrooms, those rooms become amplification hotspots - pockets of dense susceptibility where 
+        transmission chains can sustain themselves before spreading to better-protected classrooms. This demonstrates why <em>coverage distribution 
+        matters as much as coverage level</em>.</p>
+
+    <h2>Sensitivity Analysis and Model Robustness</h2>
+    <p>To verify that findings weren't artifacts of specific parameter choices, I ran systematic sensitivity analysis varying vaccination coverage 
+        from 0% to 95% in 5% increments, with 5 stochastic replicates at each level.</p>
+
+    <p><strong>Results:</strong></p>
+    <ul>
+        <li><strong>Smooth dose-response curve:</strong> Attack rate decreases monotonically with coverage, no unexpected plateaus</li>
+        <li><strong>Sharp transition near HIT:</strong> At 90% coverage, attack rates average ~15%; at 95%, they drop to ~3%</li>
+        <li><strong>Stochastic fadeout evident:</strong> At high coverage (>90%), some replicates show complete fadeout (0 secondary cases)</li>
+        <li><strong>Peak infectious tracks attack rate:</strong> Both metrics decline together, validating internal consistency</li>
+    </ul>
+
+    <p>This sensitivity analysis serves dual purposes: it confirms robustness to parameter uncertainty <em>and</em> provides actionable policy 
+        insights by quantifying the coverage-outcome relationship across the full range.</p>
+
+    <h2>Key Insights and Methodological Decisions</h2>
+
+    <p><strong>When to Use ABM vs. ODE Models</strong></p>
+    <ul>
+        <li><strong>Use ABM when:</strong> (1) Population has clear spatial/network structure, (2) Individual heterogeneity drives dynamics, 
+            (3) Stochasticity matters for small outbreaks, (4) Interventions target specific subgroups, (5) Visualization of spatial spread is valuable</li>
+        <li><strong>Use ODEs when:</strong> (1) Population is large and well-mixed, (2) Parameter estimation from aggregate data is needed, 
+            (3) Computational speed is critical, (4) Focus is population-level trends, (5) Analytic tractability is desired</li>
+        <li><strong>This project's choice:</strong> ABM was essential because school classroom structure fundamentally shapes transmission. Trying 
+            to capture heterogeneous vaccination clustering in ODEs would require dozens of stratified compartments, losing tractability. ABM's 
+            natural representation of individuals in spaces made the model both simpler and more realistic.</li>
+    </ul>
+
+    <p><strong>Contact Network Calibration</strong></p>
+    <ul>
+        <li><strong>Challenge:</strong> How many contacts should each student make? Too few and disease doesn't spread; too many and computational 
+            cost explodes.</li>
+        <li><strong>Solution:</strong> Calibrated to produce realistic R₀ (~13-16) by combining literature values (contact frequencies from 
+            Stehlé et al.) with adjusted transmission probabilities. Validated that within-classroom R₀ dominates (R₀<sub>within</sub> ≈ 12.8) 
+            while between-classroom contributes weakly (R₀<sub>between</sub> ≈ 0.3).</li>
+        <li><strong>Why not fit to data?:</strong> Unlike my ODE projects, this is a theoretical model not calibrated to outbreak data. The goal 
+            was exploring dynamics and testing scenarios, not reproducing specific historical outbreaks. For policy use, I'd fit to real school 
+            outbreak data (e.g., documented measles outbreaks in undervaccinated communities).</li>
+    </ul>
+
+    <p><strong>Stochastic vs. Deterministic</strong></p>
+    <ul>
+        <li><strong>ABM is inherently stochastic.</strong> Each simulation produces different results due to random contact patterns, transmission 
+            events, and disease progression times. This isn't noise, it's reality. Small outbreaks can randomly extinguish before spreading.</li>
+        <li><strong>Handling stochasticity:</strong> Run multiple replicates (typically 5-10) and report mean outcomes with spread. For policy 
+            analysis, show distribution of outcomes, not just point estimates.</li>
+        <li><strong>Comparison to ODEs:</strong> My previous models were deterministic - run once, get the trajectory. ABM requires thinking in 
+            distributions: "What's the <em>probability</em> an outbreak takes off?" not "Will it take off?"</li>
+    </ul>
+
+    <p><strong>Computational Efficiency Decisions</strong></p>
+    <ul>
+        <li><strong>Contact sampling:</strong> Rather than checking all possible pairs (O(N²) = 202,500 pairs), I have each infectious student 
+            sample their contacts from their classroom and from the broader school. This reduces to O(N·K) where K ≈ 25, much faster.</li>
+        <li><strong>Spatial indexing:</strong> Students organized by (grade, classroom) allow quick lookup of "same classroom" and "same grade" 
+            without searching the full student list.</li>
+        <li><strong>Vectorized state checks:</strong> List comprehensions and numpy operations for filtering students by state are vastly faster 
+            than explicit loops.</li>
+        <li><strong>Result:</strong> 120-day simulation with 450 agents runs in ~2-3 seconds, fast enough for interactive exploration and 
+            scenario testing.</li>
+    </ul>
+
+    <h2>Public Health Implications</h2>
+    <p>This modeling work has direct policy relevance:</p>
+
+    <p><strong>1. Vaccination Coverage Requirements Are Real</strong></p>
+    <p>The theoretical herd immunity threshold (93-95%) isn't just math, it's the actual coverage needed to protect communities. Schools falling 
+        below this threshold face substantial outbreak risk, even if "most" students are vaccinated. Policy should target ≥95% coverage to ensure 
+        reliable protection.</p>
+
+    <p><strong>2. Clustering Defeats Coverage</strong></p>
+    <p>A school with 85% average coverage sounds good, but if that 15% unvaccinated population clusters in two classrooms, those become outbreak 
+        epicenters. Public health interventions must address not just <em>how many</em> are vaccinated, but <em>where</em> the gaps are. 
+        Targeted outreach to undervaccinated communities is essential.</p>
+
+    <p><strong>3. School Structure Matters for Containment</strong></p>
+    <p>Visualizing spatial spread revealed actionable intervention points. If an outbreak is detected early (1-2 cases), closing the affected 
+        classroom could contain spread before it reaches other grades. This is testable in future ABM work—add classroom closure as an 
+        intervention parameter.</p>
+
+    <p><strong>4. Small Outbreaks Are Unpredictable</strong></p>
+    <p>At high coverage (>90%), stochastic fadeout becomes likely. This creates uncertainty for outbreak response: "Will this case spark an 
+        outbreak?" is genuinely probabilistic. Public health planning should account for this uncertainty, not assume deterministic trajectories.</p>
+
+    <h2>Limitations and Extensions</h2>
+
+    <h3>Current Limitations</h3>
+    <ul>
+        <li><strong>No household transmission:</strong> Siblings in different grades aren't explicitly modeled. Real outbreaks show household 
+            amplification—adding this would require household ID tracking.</li>
+        <li><strong>Homogeneous contact patterns:</strong> All Grade 3 students make ~20 contacts/day. Reality has variation - introverted vs. 
+            extroverted students, lunch table cliques, etc.</li>
+        <li><strong>No age-dependent parameters:</strong> Younger children might have different susceptibility or contact patterns than older ones.</li>
+        <li><strong>Not calibrated to data:</strong> This is a theoretical model. For real-world application, fit to documented outbreak data 
+            (attack rates, generation time, spatial spread patterns).</li>
+        <li><strong>No uncertainty quantification:</strong> Parameter values are point estimates. Bayesian calibration could provide credible 
+            intervals on predictions.</li>
+    </ul>
+
+    <h3>Future Extensions</h3>
+    <p><strong>High Priority:</strong></p>
+    <ul>
+        <li><strong>Intervention testing:</strong> Model classroom closures, ring vaccination, contact tracing</li>
+        <li><strong>Household structure:</strong> Add family connections between students in different grades</li>
+        <li><strong>Data calibration:</strong> Fit to documented school outbreaks (e.g., 2015 Disneyland outbreak school cases)</li>
+        <li><strong>Multiple schools:</strong> Expand to community level with between-school transmission</li>
+    </ul>
+
+    <p><strong>Lower Priority But Interesting:</strong></p>
+    <ul>
+        <li>Social network variation (not all students have equal connectedness)</li>
+        <li>Age-specific transmission rates</li>
+        <li>Symptomatic vs. asymptomatic presentation effects</li>
+        <li>Temporal vaccination campaigns (gradual rollout)</li>
+    </ul>
+
+    <h2>What I Learned</h2>
+    <p>This project marked a significant expansion of my modeling toolkit. Moving from compartmental ODEs to agent-based models required 
+        fundamentally different thinking:</p>
+
+    <p><strong>Individual-Level Coding Is Different.</strong> Instead of writing differential equations, I'm managing object-oriented class 
+        hierarchies (Student → School), tracking state transitions for hundreds of individuals, and thinking about contact network algorithms. 
+        The code architecture matters more. Modular design is essential when complexity scales with population size.</p>
+
+    <p><strong>Visualization Becomes Central.</strong> In ODE models, I plot S(t), E(t), I(t), R(t) curves. In ABM, the power is seeing disease 
+        spread across classrooms, watching clusters form, observing spatial patterns emerge. Animation and heatmaps aren't optional extras, they're 
+        primary analytical tools.</p>
+
+    <p><strong>Stochasticity Changes Interpretation.</strong> With ODEs, I report "the outbreak peaks at day 42." With ABM, I report "the outbreak 
+        peaks at day 42±7 (mean±SD across replicates)." Embracing uncertainty means acknowledging that real outbreaks have 
+        irreducible randomness.</p>
+
+    <p><strong>Computational Efficiency Is Non-Negotiable.</strong> A 120-day simulation that takes 5 minutes isn't usable for sensitivity 
+        analysis requiring 100+ runs. I learned to profile code, optimize bottlenecks, and design algorithms that scale. For agent-based work, 
+        computational thinking is as important as epidemiological thinking.</p>
+
+    <p><strong>The Right Tool for the Right Question.</strong> This project crystallized when to use which modeling approach. ABM doesn't 
+        replace compartmental models—it complements them. For policy questions about structured populations with heterogeneous interventions, 
+        ABM is often the only approach that captures the relevant mechanisms. For population-level parameter estimation and long-term trend 
+        projection, ODEs remain superior.</p>
+
+    <h2>Broader Context</h2>
+    <p>Agent-based modeling has a rich history in epidemiology, from early work on smallpox (Halloran et al., 2002) through pandemic influenza 
+        planning (Ferguson et al., 2006) to modern COVID-19 response (Kerr et al., 2021). This project builds on that tradition while focusing 
+        on a specific, policy-relevant context: school-based outbreaks of vaccine-preventable diseases.</p>
+
+    <p>The model's structure - individual agents in spatial containers with network-based contacts - is generalizable beyond measles. The same 
+        framework could model influenza in offices, tuberculosis in prisons, or STIs in sexual networks. What changes are the parameters (R₀, 
+        infectious period), not the fundamental architecture.</p>
+
+    <p class="mt-5">
+        <a href="https://github.com/vscerra/disease_modeling_project/blob/main/notebooks/ABM_Measles_Outbreak_model.ipynb" class="btn btn-primary me-2">View Source Code</a>
+    </p>
+  </div>
+</body>
+</html>
