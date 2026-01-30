@@ -74,7 +74,6 @@
         <li class="nav-item">
           <a class="nav-link" href="../../index.html#projects">Projects</a>
         </li>
-        </li>
         <li class="nav-item">
           <a class="nav-link" href="../../index.html#skills">Skills</a>
         </li>
@@ -91,87 +90,214 @@
     <a href="disease_modeling.html" class="btn btn-outline-secondary mb-4">&larr; Back to Disease Modeling</a>
 
     <section id="references">
-  <h1>References</h1>
+  <h1>Disease Modeling References</h1>
+  <p class="lead">A comprehensive bibliography organized by project, documenting the epidemiological literature, mathematical methods, and data sources that informed each modeling study.</p>
 
-
-
-  <ul>
-    <li>
-      Barnet, E. D. (2007). 
-      <a href="https://doi.org/10.1086/511869" target="_blank" rel="noopener noreferrer">
-        <em>Yellow fever: epidemiology and prevention</em>
-      </a>
-      . Clinical Infectious Diseases, 44(6). 850-856.
-    </li>
-
-    <li>
-      Brauer, F., van den Driessche, P., Wu, J (Eds.) (2008). 
+  <!-- General/Cross-Project References -->
+  <h2 class="mt-5 mb-3" style="border-bottom: 2px solid #8e5e3b; padding-bottom: 0.5rem;">General Methodology</h2>
+  <p class="text-muted">Foundational texts and methods applicable across multiple projects.</p>
+  
+  <ul class="list-unstyled">
+    <li class="mb-3">
+      <strong>Brauer, F., van den Driessche, P., Wu, J (Eds.) (2008).</strong>
       <a href="https://doi.org/10.1007/978-3-540-78911-6" target="_blank" rel="noopener noreferrer">
         <em>Mathematical Epidemiology</em>
-      </a>
-      . Springer.
+      </a>.
+      Springer.
+      <div class="text-muted small ms-3">Comprehensive textbook on compartmental modeling, parameter estimation, and epidemic theory.</div>
+    </li>
+
+    <li class="mb-3">
+      <strong>Storn, R., Price, K. (1997).</strong>
+      <a href="https://www.cp.eng.chula.ac.th/~prabhas//teaching/ec/ec2012/storn_price_de.pdf" target="_blank" rel="noopener noreferrer">
+        <em>Differential Evolution - A Simple and Efficient Heuristic for Global Optimization over Continuous Spaces</em>
+      </a>.
+      Journal of Global Optimization, 11, 341-359.
+      <div class="text-muted small ms-3">Global optimization algorithm used for parameter estimation in the Cuba HIV/AIDS model.</div>
+    </li>
+  </ul>
+
+  <!-- Cuban HIV/AIDS Project -->
+  <h2 class="mt-5 mb-3" style="border-bottom: 2px solid #8e5e3b; padding-bottom: 0.5rem;">Cuban HIV/AIDS Model</h2>
+  <p class="text-muted">Compartmental modeling of contact tracing effectiveness (1986-2000).</p>
+  
+  <ul class="list-unstyled">
+    <li class="mb-3">
+      <strong>De Arazoza, H., Lounes, R. (2002).</strong>
+      <a href="https://helios2.mi.parisdescartes.fr/~lounes/rapports/ima2002.pdf" target="_blank" rel="noopener noreferrer">
+        <em>A non-linear model for a sexually transmitted disease with contact tracing</em>
+      </a>.
+      IMA Journal of Mathematics Applied in Medicine and Biology, 19, 221-234.
+      <div class="text-muted small ms-3">Primary data source: annual HIV cases, AIDS cases, and deaths in Cuba from 1986-2000.</div>
+    </li>
+  </ul>
+
+  <!-- Senegal Yellow Fever Project -->
+  <h2 class="mt-5 mb-3" style="border-bottom: 2px solid #8e5e3b; padding-bottom: 0.5rem;">Senegal Yellow Fever Outbreak (2002)</h2>
+  <p class="text-muted">SEIR model with vaccination intervention and parameter estimation.</p>
+  
+  <ul class="list-unstyled">
+    <li class="mb-3">
+      <strong>Barnet, E. D. (2007).</strong>
+      <a href="https://doi.org/10.1086/511869" target="_blank" rel="noopener noreferrer">
+        <em>Yellow fever: epidemiology and prevention</em>
+      </a>.
+      Clinical Infectious Diseases, 44(6). 850-856.
+      <div class="text-muted small ms-3">Overview of yellow fever epidemiology and transmission dynamics.</div>
+    </li>
+
+    <li class="mb-3">
+      <strong>Garske, T., Van Kerkhove, M. D., Yactayo, S., Ronveaux, O., Lewis, R. F., Staples, J. E., ... & Ferguson, N. M. (2014).</strong>
+      <a href="https://doi.org/10.1371/journal.pmed.1001638" target="_blank" rel="noopener noreferrer">
+        <em>Yellow Fever in Africa: estimating the burden of disease and impact of mass vaccination from outbreak and serological data</em>
+      </a>.
+      PLoS Medicine, 11(5), e1001638.
+      <div class="text-muted small ms-3">Infectious period estimates and vaccination impact assessment methodology.</div>
     </li>
     
-    <li>
-        De Arazoza, H., Lounes, R. (2002).
-        <a href="https://helios2.mi.parisdescartes.fr/~lounes/rapports/ima2002.pdf" target="_blank" rel="noopener noreferrer">
-            <em>A non-linear model for a sexually transmitted disease with contact tracing</em>
-        </a>
-        . IMA Journal of Mathematics Applied in Medicine and Biology, 19, 221-234. 
-    </li>
-
-    <li>
-        Garske, T., Van Kerkhove, M. D., Yactayo, S., Ronveaux, O., Lewis, R. F., Staples, J. E., ... & Ferguson, N. M. (2014).
-        <a href="https://doi.org/10.1371/journal.pmed.1001638" target="_blank" rel="noopener noreferrer">
-            <em>Yellow Fever in Africa: estimating the burden of disease and impact of mass vaccination from outbreak and serological data</em>
-        </a>
-        . PLoS Medicine, 11(5), e1001638. 
+    <li class="mb-3">
+      <strong>Monath, T. P. (2012).</strong>
+      <a href="https://doi.org/10.1016/j.jcv.2014.08.030" target="_blank" rel="noopener noreferrer">
+        <em>Review of the risks and benefits of yellow fever vaccination including some new analyses</em>
+      </a>.
+      Expert Review of Vaccines, 11(4), 427-448.
+      <div class="text-muted small ms-3">Vaccine efficacy data and safety profile.</div>
     </li>
     
-    <li>
-        Monath, T. P. (2012).
-        <a href="https://doi.org/10.1016/j.jcv.2014.08.030" target="_blank" rel="noopener noreferrer">
-            <em>Review of the risks and benefits of yellow fever vaccination including some new analyses</em>
-        </a>
-        . Expert Review of Vaccines, 11(4), 427-448. 
-    </li>
-    
-    <li>
-        Monath, T. P. & Vasconcelos, P. F. (2015).
-        <a href="https://doi.org/10.1016/j.jcv.2014.08.030" target="_blank" rel="noopener noreferrer">
-            <em>Yellow Fever</em>
-        </a>
-        . Journal of Clinical Virology, 64, 160-173. 
+    <li class="mb-3">
+      <strong>Monath, T. P. & Vasconcelos, P. F. (2015).</strong>
+      <a href="https://doi.org/10.1016/j.jcv.2014.08.030" target="_blank" rel="noopener noreferrer">
+        <em>Yellow Fever</em>
+      </a>.
+      Journal of Clinical Virology, 64, 160-173.
+      <div class="text-muted small ms-3">Comprehensive review of clinical parameters including incubation period (6 days).</div>
     </li>
 
-    <li>
-        Staples, J. E., Gershman, M., & Fischer, M. (2010).
-        <a href="https://pubmed.ncbi.nlm.nih.gov/20671663/" target="_blank" rel="noopener noreferrer">
-            <em>Yellow fever vaccine: recommendations of the Advisory Committee on Immunization Practices (ACIP)</em>
-        </a>
-        . MMWR Recommendations and Reports, 59(RR-7), 1-27.
-    </li>
-    
-    <li>
-        Storn, R., Price, K. (1997).
-        <a href="https://www.cp.eng.chula.ac.th/~prabhas//teaching/ec/ec2012/storn_price_de.pdf" target="_blank" rel="noopener noreferrer">
-            <em>Differential Evolution - A Simple and Efficient Heuristic for Global Optimization over Continuous Spaces</em>
-        </a>
-        . Journal of Global Optimization, 11, 341-359. 
+    <li class="mb-3">
+      <strong>Staples, J. E., Gershman, M., & Fischer, M. (2010).</strong>
+      <a href="https://pubmed.ncbi.nlm.nih.gov/20671663/" target="_blank" rel="noopener noreferrer">
+        <em>Yellow fever vaccine: recommendations of the Advisory Committee on Immunization Practices (ACIP)</em>
+      </a>.
+      MMWR Recommendations and Reports, 59(RR-7), 1-27.
+      <div class="text-muted small ms-3">CDC vaccine guidelines and efficacy standards (≥95%).</div>
     </li>
 
-    <li>
-        World Health Organization (2023).
-        <a href=" https://www.who.int/news-room/fact-sheets/detail/yellow-fever" target="_blank" rel="noopener noreferrer">
-            <em>Yellow Fever</em>
-        </a>
-        . WHO Fact Sheets. 
+    <li class="mb-3">
+      <strong>World Health Organization (2023).</strong>
+      <a href="https://www.who.int/news-room/fact-sheets/detail/yellow-fever" target="_blank" rel="noopener noreferrer">
+        <em>Yellow Fever</em>
+      </a>.
+      WHO Fact Sheets.
+      <div class="text-muted small ms-3">Current epidemiology, outbreak data, and prevention strategies.</div>
+    </li>
+  </ul>
+
+  <!-- Measles ABM Project -->
+  <h2 class="mt-5 mb-3" style="border-bottom: 2px solid #8e5e3b; padding-bottom: 0.5rem;">Measles Agent-Based Model in Schools</h2>
+  <p class="text-muted">Individual-level simulation of measles transmission with spatial structure and vaccination clustering.</p>
+  
+  <h3 class="mt-4 mb-2 h5">Epidemiological Parameters</h3>
+  <ul class="list-unstyled">
+    <li class="mb-3">
+      <strong>Centers for Disease Control and Prevention (CDC).</strong>
+      <a href="https://www.cdc.gov/measles/hcp/index.html" target="_blank" rel="noopener noreferrer">
+        <em>Measles (Rubeola): For Healthcare Professionals</em>
+      </a>.
+      CDC Website.
+      <div class="text-muted small ms-3">MMR vaccine efficacy (97% with 2 doses), infectious period (8 days), clinical parameters.</div>
     </li>
 
-    
-    </ul>
+    <li class="mb-3">
+      <strong>Guerra, F. M., Bolotin, S., Lim, G., Heffernan, J., Deeks, S. L., Li, Y., & Crowcroft, N. S. (2017).</strong>
+      <a href="https://doi.org/10.1016/S1473-3099(17)30307-9" target="_blank" rel="noopener noreferrer">
+        <em>The basic reproduction number (R₀) of measles: a systematic review</em>
+      </a>.
+      The Lancet Infectious Diseases, 17(12), e420-e428.
+      <div class="text-muted small ms-3">Systematic review of R₀ estimates (12-18), latent period (~10 days), transmissibility parameters.</div>
+    </li>
 
+    <li class="mb-3">
+      <strong>Phadke, V. K., Bednarczyk, R. A., Salmon, D. A., & Omer, S. B. (2016).</strong>
+      <a href="https://doi.org/10.1001/jama.2016.1353" target="_blank" rel="noopener noreferrer">
+        <em>Association Between Vaccine Refusal and Vaccine-Preventable Diseases in the United States</em>
+      </a>.
+      JAMA, 315(11), 1149-1158.
+      <div class="text-muted small ms-3">Evidence for vaccine refusal clustering and outbreak risk in undervaccinated communities.</div>
+    </li>
 
-   
+    <li class="mb-3">
+      <strong>World Health Organization (2017).</strong>
+      <a href="https://www.who.int/publications/i/item/who-wer9217-205-227" target="_blank" rel="noopener noreferrer">
+        <em>Measles vaccines: WHO position paper – April 2017</em>
+      </a>.
+      Weekly Epidemiological Record, 92(17), 205-228.
+      <div class="text-muted small ms-3">WHO vaccine efficacy standards, global epidemiology context, herd immunity thresholds.</div>
+    </li>
+  </ul>
+
+  <h3 class="mt-4 mb-2 h5">Contact Network Studies</h3>
+  <ul class="list-unstyled">
+    <li class="mb-3">
+      <strong>Read, J. M., Edmunds, W. J., Riley, S., Lessler, J., & Cummings, D. A. (2012).</strong>
+      <a href="https://doi.org/10.1017/S0950268812000842" target="_blank" rel="noopener noreferrer">
+        <em>Close encounters of the infectious kind: methods to measure social mixing behaviour</em>
+      </a>.
+      Epidemiology & Infection, 140(12), 2117-2130.
+      <div class="text-muted small ms-3">Contact pattern measurement methodology, within-classroom vs between-classroom mixing ratios.</div>
+    </li>
+
+    <li class="mb-3">
+      <strong>Stehlé, J., Voirin, N., Barrat, A., Cattuto, C., Isella, L., Pinton, J. F., ... & Vanhems, P. (2011).</strong>
+      <a href="https://doi.org/10.1371/journal.pone.0023176" target="_blank" rel="noopener noreferrer">
+        <em>High-resolution measurements of face-to-face contact patterns in a primary school</em>
+      </a>.
+      PLOS ONE, 6(8), e23176.
+      <div class="text-muted small ms-3">Empirical contact network data from primary schools: ~20 within-classroom contacts/day, contact duration distributions.</div>
+    </li>
+  </ul>
+
+  <h3 class="mt-4 mb-2 h5">Agent-Based Modeling Methodology</h3>
+  <ul class="list-unstyled">
+    <li class="mb-3">
+      <strong>Ferguson, N. M., Cummings, D. A., Fraser, C., Cajka, J. C., Cooley, P. C., & Burke, D. S. (2006).</strong>
+      <a href="https://doi.org/10.1038/nature04795" target="_blank" rel="noopener noreferrer">
+        <em>Strategies for mitigating an influenza pandemic</em>
+      </a>.
+      Nature, 442(7101), 448-452.
+      <div class="text-muted small ms-3">Large-scale ABM implementation for pandemic planning, school closure intervention modeling.</div>
+    </li>
+
+    <li class="mb-3">
+      <strong>Halloran, M. E., Longini Jr, I. M., Nizam, A., & Yang, Y. (2002).</strong>
+      <a href="https://doi.org/10.1126/science.1074674" target="_blank" rel="noopener noreferrer">
+        <em>Containing bioterrorist smallpox</em>
+      </a>.
+      Science, 298(5597), 1428-1432.
+      <div class="text-muted small ms-3">Foundational work on ABM for vaccine-preventable diseases, intervention strategy evaluation.</div>
+    </li>
+
+    <li class="mb-3">
+      <strong>Kerr, C. C., Stuart, R. M., Mistry, D., Abeysuriya, R. G., Rosenfeld, K., Hart, G. R., ... & Klein, D. J. (2021).</strong>
+      <a href="https://doi.org/10.1371/journal.pcbi.1009149" target="_blank" rel="noopener noreferrer">
+        <em>Covasim: an agent-based model of COVID-19 dynamics and interventions</em>
+      </a>.
+      PLOS Computational Biology, 17(7), e1009149.
+      <div class="text-muted small ms-3">Modern ABM framework demonstrating network structure, stochastic dynamics, and intervention testing.</div>
+    </li>
+
+    <li class="mb-3">
+      <strong>Willem, L., Verelst, F., Bilcke, J., Hens, N., & Beutels, P. (2017).</strong>
+      <a href="https://doi.org/10.1186/s12879-017-2699-8" target="_blank" rel="noopener noreferrer">
+        <em>Lessons from a decade of individual-based models for infectious disease transmission: a systematic review (2006-2015)</em>
+      </a>.
+      BMC Infectious Diseases, 17(1), 612.
+      <div class="text-muted small ms-3">Comprehensive review of ABM best practices, validation approaches, and methodological standards.</div>
+    </li>
+  </ul>
+
+</section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
