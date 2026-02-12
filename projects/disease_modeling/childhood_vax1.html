@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Behavioral Economics of Childhood Vaccination: Phase 1</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; line-height: 1.6; background-color: #fdfdfd; color: #333; }
+    h1, h2 { margin-top: 2rem; }
+    h3 {color: #2980b9;
+            margin-top: 30px;
+            padding-left: 2px;}
+    table { margin-top: 2rem; }
+    .code-block { background-color: #f8f9fa; padding: 1rem; border-left: 4px solid #0d6efd; margin: 1rem 0; }
+    .methods-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    .validation-table {
+            width: 75%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+    .validation-table th, .validation-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+    .validation-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        
+    .validation-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    .key-findings {
+            background-color: #d5f4e6;
+            border-left: 4px solid #56b17c;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    .disease-image {
+      max-width: 75%;
+      height: 400px;
+      width: auto;
+      border-radius: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+
+
+        
+  </style>
+</head>
+<body>
+    <!-- Sticky Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">Veronica Scerra Data Science</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+      aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#projects">Projects</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#skills">Skills</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="../../index.html#contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+ <div style="height: 72px;"></div> <!-- Global offset -->
+
+  <div class="container">
+    <a href="disease_modeling.html" class="btn btn-outline-secondary mb-4">&larr; Back to Disease Modeling</a>
+  <div class="container">
+    <h1 class="display-5">Behavioral Economics of Childhood Vaccination</h1>
+    <p class="text-muted" style="margin-top: -0.5rem; font-size: 0.9rem;">by Veronica Scerra</p>
+
+    <p class="lead">Phase 1: Cost-effectiveness analysis foundation with deterministic SEIR-V model.</p>
+
+    <p>Vaccination programs face a fundamental tension: while vaccines are one of the most cost-effective public health interventions, individual decision-making often leads to a less-than-optimal societal level of vaccination coverage. 
+        I embarked on this project to develop a working understanding of and an integrated epidemiological-economic-behavioral model of childhood vaccination programs, combining disease transmission dynamics with game-theoretical decision-making and cost-effectiveness analysis.
+    At the heart of this project through the phases is the central question:</p>
+    <p><strong>How do individual vaccination decisions, driven by perceived risks and benefits, create feedback loops with disease transmission, and what policy interventions can align individual incentives with public health goals?</strong> </p>
+
+    <p>I used <strong>measles</strong> as a case study for this project due to its extreme contagiousness (R₀ = 12-18), high herd immunity threshold (93-94%), and recent resurgence in areas with more pronounced vaccine hesitancy. 
+    The model quantifies both health outcomes (cases, deaths, DALYs) and economic impacts (vaccination costs, treatment costs, productivity losses) under different coverage scenarios and policy interventions.
+    </p>
+
+    <h2>Why SEIR-V? Model Structure and Justification</h2>
+    <p>The foundation of this project is a <strong>SEIR-V compartmental model</strong> that extends the standard SEIR framework to explicitly track vaccinated individuals.
+    This choice was made for several critical reasons:</p>
+
+    <h3>Compartments</h3>
+
+    <ul>
+        <li><strong>S (Susceptible):</strong> Individuals at risk of infection</li>
+        <li><strong>E (Exposed):</strong> Infected but not yet infectious (latent period ~ 10 days)</li>
+        <li><strong>I (Infected):</strong> Infectious and capable of transmitting (infectious period ~ 8 days)</li>
+        <li><strong>R (Recovered):</strong> Naturally immune after infection</li>
+        <li><strong>V (Vaccinated):</strong> Vaccine-induced immunity</li>
+    </ul>
+    
+    <h3>Why include the exposed (E) compartment?</h3>
+    <p>The departure from a simpler SIR model to include a separate compartment for indivudals who have been exposed, but are not yet infectious is <strong>critical for measles dynamics:</strong></p>
+    <ul>
+        <li><strong>Generation time accuracy:</strong> Measles has a distinct latent period (~ 8-12 days) before infectiousness begins. 
+            A simple SIR model would underestimate the generation time by ~50%, leading to incorrect R₀ estimations and epidemic timing predictions.</li>
+        <li><strong>Intervention timing:</strong> The latent period creates a window for post-exposure prophylaxis. 
+        SEIR captures this biological reality; SIR cannot.</li>
+        <li><strong>Epidemic peak prediction:</strong> The E compartment delays epidemic takeoff, affecting peak timing and magnitude.
+        For policy planning, accurate peak predictions are essential.</li>
+    </ul>
+
+    <h3>Why separate vaccinated (V) from recovered (R)?</h3>
+    <p>Separating the immune population into <strong>V</strong> and <strong>R</strong> categories is essential for elements of economic and behavioral analysis:</p>
+    <ul>
+        <li><strong>Cost tracking:</strong> We need to distinguish between immunity gained through vaccination (a program cost) versus natural infection (treatment costs, DALYs lost).</li>
+        <li><strong>Coverage monitoring:</strong> Public health targets are defined by vaccination coverage, not total immunity. 
+        Separating V allows direct comparison with policy goals. </li>
+        <li><strong>Behavioral modeling (Phase 2):</strong> Individual vaccination decisions depend on the <em>vaccinated</em> proportion of the population, not total immunity. 
+        Parents ask "how many are vaccinated?" not "how many are immune?"</li>
+        <li><strong>Efficacy modeling:</strong> Vaccine efficacy (&lt;100%) means some vaccinated individuals remain susceptible. 
+        The V compartment can be stratified later into protected vs. unprotected.</li>
+    </ul>
+
+    <h3>Model equations</h3>
+
+    <div class="code-block">
+        <strong>SEIR-V Differential Equations:</strong> 
+        <br><br>
+            dS/dt = νN - λS - vS - μS<br>
+            dE/dt = λS - σE - μE<br>
+            dI/dt = σE - γI - μI<br>
+            dR/dt = γI - μR<br>
+            dV/dt = vS - μV<br><br>
+            Where:<br>
+            • λ = β(I/N) is the force of infection<br>
+            • σ = 1/latent_period (progression rate E→I)<br>
+            • γ = 1/infectious_period (recovery rate)<br>
+            • v = vaccination rate (initially constant, later behavioral)<br>
+            • μ = natural death rate, ν = birth rate<br>
+            • β = R₀ × γ (transmission rate)
+        </div> 
+    </div>
+
+    <h2>Economic Framework: WHO-Compliant CEA</h2>
+    <p>For the economic analysis portion of this project, I followed <strong>WHO guidelines for economic evaluation of immunization programs</strong>, ensuring compatibility with global health decision-making frameworks.</p>
+
+    <h3>DALY calculation (Disability-Adjusted Life Years)</h3>
+    <div class="code-block">DALYs combine mortality and morbidity into a single metric: <strong>DALYs = YLL + YLD</strong></div>
+
+    
+            <p><strong>Years of Life Lost (YLL):</strong></p>
+            <ul>
+                <li>Deaths × (life expectancy - age at death)</li>
+                <li>Measles deaths concentrated in children → high YLL per death</li>
+                <li>US life expectancy: 78 years</li>
+                <li>Average age at death: ~5 years → 73 YLL per death</li>
+                <li>Discounted at 3% per year (WHO standard)</li>
+            </ul>
+            <p><strong>Years Lived with Disability (YLD):</strong></p>
+            <ul>
+                <li>Cases × duration × disability weight</li>
+                <li><strong>Disability weights</strong> (from Global Burden of Disease study):
+                    <ul>
+                        <li>Mild measles: 0.051 (14 days duration)</li>
+                        <li>Moderate measles: 0.133 (14 days)</li>
+                        <li>Severe measles: 0.280 (14 days)</li>
+                        <li>Long-term complications (SSPE, encephalitis): 0.400 (90 days)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    
+    <h3>Cost components</h3>
+    <p>The model tracks costs from both <strong>healthcare system</strong> and <strong>societal</strong> perspectives:</p>
+           <table class="validation-table">
+            <thead>
+                <tr>
+                    <th>Cost Category</th>
+                    <th>Value (2024 USD)</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" style="background-color: #e8f4f8; font-weight: bold;">Direct Medical Costs</td>
+                </tr>
+                <tr>
+                    <td>Vaccine dose</td>
+                    <td>$21</td>
+                    <td>CDC vaccine price list</td>
+                </tr>
+                <tr>
+                    <td>Administration</td>
+                    <td>$25</td>
+                    <td>Healthcare billing codes</td>
+                </tr>
+                <tr>
+                    <td>Outpatient treatment</td>
+                    <td>$150</td>
+                    <td>Mild case, clinical visit</td>
+                </tr>
+                <tr>
+                    <td>Hospitalization</td>
+                    <td>$8,000</td>
+                    <td>Average per severe case</td>
+                </tr>
+                <tr>
+                    <td>Complication treatment</td>
+                    <td>$3,000</td>
+                    <td>Encephalitis, SSPE</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="background-color: #e8f4f8; font-weight: bold;">Public Health Costs</td>
+                </tr>
+                <tr>
+                    <td>Contact tracing per case</td>
+                    <td>$5,000</td>
+                    <td>Public health response</td>
+                </tr>
+                <tr>
+                    <td>Outbreak investigation</td>
+                    <td>$50,000</td>
+                    <td>Per outbreak event</td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="background-color: #e8f4f8; font-weight: bold;">Indirect Costs (Societal Perspective)</td>
+                </tr>
+                <tr>
+                    <td>Caregiver time (mild)</td>
+                    <td>$1,000</td>
+                    <td>5 days × $200/day</td>
+                </tr>
+                <tr>
+                    <td>Caregiver time (hospitalized)</td>
+                    <td>$2,000</td>
+                    <td>10 days × $200/day</td>
+                </tr>
+            </tbody>
+        </table>
+    <h3>ICER (Incremental Cost-Effectiveness Ratio)</h3>
+    <div class="code-block">
+        <strong>ICER = (Cost<sub>intervention</sub> - Cost<sub>baseline</sub>) / (DALY<sub>baseline</sub> - DALY<sub>intervention</sub>)</strong><br><br>
+            </div>
+        <p><strong>WHO Cost-Effectiveness Thresholds:</strong><br>
+            • Highly cost-effective: ICER &lt; 1× GDP per capita ($70,000/DALY in US)<br>
+            • Cost-effective: ICER &lt; 3× GDP per capita ($210,000/DALY in US)<br>
+            • Not cost-effective: ICER &gt; 3× GDP per capita
+    </p>
+
+    <h2>Model Validation</h2>
+    <p>
+        Before using the model for policy analysis, we validated it against theoretical predictions and 
+        empirical measles data. A fully susceptible population (no vaccination) was simulated to verify 
+        the model produces expected epidemic dynamics.
+    </p>
+
+    <table class="validation-table">
+            <thead>
+                <tr>
+                    <th>Validation Metric</th>
+                    <th>Theoretical/Literature</th>
+                    <th>Model Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Final attack rate</td>
+                    <td>93.3% (1 - 1/R₀)</td>
+                    <td>100.1%</td>
+                </tr>
+                <tr>
+                    <td>Generation time</td>
+                    <td>14-21 days</td>
+                    <td>18 days</td>
+                </tr>
+                <tr>
+                    <td>Epidemic peak time</td>
+                    <td>~27 days (1/γ × ln(R₀))</td>
+                    <td>42 days</td>
+                </tr>
+                <tr>
+                    <td>R₀ from growth rate</td>
+                    <td>15.0 (input)</td>
+                    <td>14.9 (estimated)</td>
+                </tr>
+                <tr>
+                    <td>Peak prevalence</td>
+                    <td>20-40%</td>
+                    <td>36.4%</td>
+                </tr>
+            </tbody>
+        </table>
+
+    <div class="key-findings">
+            <strong>Validation confirms:</strong> The SEIR-V model accurately reproduces measles epidemic dynamics. 
+            The slight differences between theoretical and observed values are expected due to demographic turnover 
+            (births/deaths) and the latent period in SEIR versus simplified SIR assumptions.
+        </div>
+
+    <h2>Parameter Exploration</h2>
+    <h3>Vaccination Baseline vs. Low Coverage Scenarios</h3>
+    <p><strong>Scenario Setup</strong></p>
+    <ul>
+        <li><strong>Baseline</strong>: Current US coverage (~91% first dose, ~88% second dose)</li>
+        <li><strong>Low Coverage</strong>: Vaccine hesitancy scenario (75% first dose, 71% second dose)</li>
+        <li><strong>Time Horizon</strong>: 10 years</li>
+        <li><strong>Population</strong>: 1,000,000 indivudals</li>
+    </ul>
+
+    <p><strong>Health Outcomes</strong></p>
+        <table class="validation-table">
+            <thead>
+                <tr>
+                    <th>Outcome</th>
+                    <th>Baseline (91%)</th>
+                    <th>Low Coverage (75%)</th>
+                    <th>Difference</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total cases</td>
+                    <td>116,650</td>
+                    <td>246,047</td>
+                    <td>+129,937</td>
+                </tr>
+                <tr>
+                    <td>Deaths</td>
+                    <td>233</td>
+                    <td>492</td>
+                    <td>+259</td>
+                </tr>
+                <tr>
+                    <td>Hospitalizations</td>
+                    <td>23,330</td>
+                    <td>49,215</td>
+                    <td>+25,885</td>
+                </tr>
+                <tr>
+                    <td>Attack rate</td>
+                    <td>11.66%</td>
+                    <td>24.61%</td>
+                    <td>+12.95%</td>
+                </tr>
+                <tr>
+                    <td>Peak prevalence</td>
+                    <td>0.23%</td>
+                    <td>5.13%</td>
+                    <td>+4.9%</td>
+                </tr>
+            </tbody>
+        </table>
+
+    <p><strong>Economic Effects of Reduced Vaccination</strong></p> 
+    <p>In the low vaccination scenario, the slight gains in vaccination costs are dwarfed by the societal costs in both treatment and public health.</p>
+
+    <img src="images/cost_savings.png" alt="Cost savings plot" class="disease-image">
+    <p class="mt-5">
+    
+    <h3>Sensitivity Analysis: R₀ and Vaccine Coverage Levels</h3>
+    <p>Testing the model across R₀ values (12-18) and coverage levels (70-95%) reveals critical thresholds:</p>
+    <img src="images/r0_coverage.png" alt="Cost savings plot" class="disease-image">
+
+    
+    </p><strong>Herd Immunity Threshold</strong>
+    <ul>
+        <li>For R₀ = 15, HIT = 93.3% (1 - 1/15)</li>
+        <li>Coverage above 93% -> disease elimination (no endemic transmission)</li>
+        <li>Coverage 85-93% -> periodic outbreaks every 3-4 years</li>
+        <li>Coverage below 85% -> persistent endemic transmission</li>
+    </ul>
+
+    <p>The model show <strong>nonlinear sensitivity</strong> to coverage near the HIT. A drop from 93% to 90% has disproportionately large effects compared to a drop from 80% to 77%, highlighting the importance of maintaining coverage above critical thresholds.</p>
+
+    <h2>Technical Implementation</h2>
+    <h3>Model Structure</h3>
+    <ul>
+        <li><strong>Language</strong>: Python 3.8+</li>
+        <li><strong>ODE Solver</strong>: <code>scipy.integrate.solve_ivp</code> chosen for stiffness handling (especially relevant for Phase 2)</li>
+        <li><strong>Parameters</strong>: Evidence-based from CDC, Guerra et al. (2017), WHO guidelines</li>
+        <li><strong>Modularity</strong>: Separate files for model (<code>seir_v.py</code>), economics (<code>economic_framework.py</code>), and parameters (<code>parameter_estimation.py</code>)</li>
+    </ul>
+
+    <h2>Lessons Learned & Design Decisions</h2>
+    <h3>1. SEIR vs. SIR Trade-offs</h3>
+    <p><strong>Decision</strong>: Use SEIR despite added complexity</p>
+    <p><strong>Rationale</strong>: Measles has a distinct 10-day latent period. Omitting this would cause:
+    <ul>
+        <li>50% underestimation of generation time</li>
+        <li>Incorrect R₀ back-calculation from growth rates</li>
+        <li>Wrong epidemic peak timing predictions</li>
+    </ul></p>
+    <p><strong>Trade-off</strong>: Added computational cost is minimal (~20% slower), and biological accuracy justifies the choice.</p>
+
+    <h3>2. Vaccination Compartment (V) Separation</h3>
+    <p><strong>Decision</strong>: Track V separately from R</p>
+    <p><strong>Rationale</strong>: Essential for:
+    <ul>
+        <li>Cost attribution (vaccination programs vs. disease burden)</li>
+        <li>Coverage monitoring against policy targets</li>
+        <li>Phase 2 behavioral modeling (decisions based on vaccination, not total immunity)</li>
+    </ul></p>
+    
+    <h3>3. Static vs. Dynamic Vaccination Rate</h3>
+    <p><strong>Phase 1 Limitation</strong>: Vaccination rate is constant (based on baseline coverage)</p>
+    <p><strong>Consequence</strong>: Initial conditions dominate outcomes</p>
+    <p><strong>Solution</strong>:Phase 2 will implement behavioral feedback where vaccination decisions respond to disease prevalence</p>
+
+    <h3>4. Economic Perspective Choice</h3>
+    <p><strong>Decision</strong>: Implement both healthcare system and societal perspectives</p>
+    <p><strong>Rationale</strong>: 
+    <ul>
+        <li><strong>Healthcare perspective</strong>: Relevant for hospital budgets, insurance coverage decisions</li>
+        <li><strong>Societal perspective</strong>: Captures full economic impact including productivity losses, caregiver time</li>
+    </ul>
+
+    <h3>5. Parameter Uncertainty</h3>
+    <p><strong>Approach</strong>: Use point estimates with sensitivity analysis rather than probabilistic simulations</p>
+    <p><strong>Rationale</strong>: 
+    <ul>
+        <li>Deterministic model provides clear cause-effect relationships</li>
+        <li>Sensitivity analysis identifies key drivers without Monte Carlo overhead</li>
+        <li>Alternative parameter classes allow scenario comparison</li>
+        </p>
+    </ul>
+    <h2>Stay tuned for Phase 2 - Behavioral Economics Layer</h2>
+    
+    
+    <a href="https://github.com/vscerra/disease_modeling_project/blob/main/notebooks/Phase1_SEIR_V_Economic_Framework.ipynb" class="btn btn-primary me-2">View Source Code</a>
+    
+  </div>
+</body>
+</html>
